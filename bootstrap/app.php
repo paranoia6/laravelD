@@ -28,6 +28,7 @@ return Application::configure(basePath: dirname(__DIR__))
                 return response()->json([
                     'message' => 'اطلاعات وارد شده صحیح نمی‌باشد.',
                     'errors' => $e->errors(),
+                    'data' => null
                 ], 422);
             }
 
