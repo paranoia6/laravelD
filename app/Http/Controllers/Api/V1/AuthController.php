@@ -62,7 +62,7 @@ class AuthController extends Controller
 
             if (!$user->is_active) {
                 return response()->json([
-                    'message' => 'حساب شما به علت نقض قوانین تا 12 ساعت آینده مسدود می باشد؛ لطفا بعدا تلاش کنید.',
+                    'message' => 'حساب شما به علت نقض قوانین مسدود می باشد',
                     'data'    => new \stdClass()
                 ], 403); // 403 Forbidden
             }
