@@ -1,35 +1,29 @@
 @import 'tailwindcss';
 
+@source '../views/**/*.blade.php';
+
 @font-face {
     font-family: 'Vazirmatn';
     src: url('../fonts/Vazirmatn-Regular.woff2') format('woff2');
     font-weight: 400;
-    font-style: normal;
-    font-display: swap;
 }
 
 @font-face {
     font-family: 'Vazirmatn';
     src: url('../fonts/Vazirmatn-Medium.woff2') format('woff2');
     font-weight: 500;
-    font-style: normal;
-    font-display: swap;
 }
 
 @font-face {
     font-family: 'Vazirmatn';
     src: url('../fonts/Vazirmatn-Bold.woff2') format('woff2');
     font-weight: 700;
-    font-style: normal;
-    font-display: swap;
 }
-
-@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
-@source '../../storage/framework/views/*.php';
 
 @theme {
-    --font-sans: 'Vazirmatn', ui-sans-serif, system-ui, sans-serif;
+    --font-sans: 'Vazirmatn', sans-serif;
 }
+
 html,
 body {
     font-family: 'Vazirmatn', sans-serif;
