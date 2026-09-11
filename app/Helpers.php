@@ -24,3 +24,17 @@ function convertToPersianTypeAccount($account_type) {
         return "سوپر ویژه";
     }
 }
+
+function remainingDays(string $date): string
+{
+    $now = now();
+    $expiresAt = \Carbon\Carbon::createFromFormat('Y-m-d H:i:s', $date);
+
+    if ($expiresAt->isPast()) {
+        return 'اتمام رسیده';
+    }
+
+    $days = $now->diffInDays($expiresAt);
+
+    return '+'.floor($days);
+}

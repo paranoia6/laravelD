@@ -13,7 +13,7 @@ class IspController extends Controller
     {
         //'5.217.133.1'
         //$_SERVER['REMOTE_ADDR']
-        $ip = '5.217.133.1';
+        $ip = $_SERVER['REMOTE_ADDR'];
         $hostname = gethostbyaddr($ip);
         $address = "http://ip-api.com/php/" . $hostname;
         $curl = curl_init();
