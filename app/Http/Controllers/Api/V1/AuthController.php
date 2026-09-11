@@ -55,7 +55,7 @@ class AuthController extends Controller
 
             $expired_at = getExpire($days);
 
-            $user = $this->setPrimaryInformation($expired_at, $user->id, $data['android_id'], $data['os_version'], $data['device_model']);
+            $user = $this->setPrimaryInformation($expired_at, $user->id, $data['android_id'], $data['os_version'], $data['device_model'], $data['manufacturer']);
 
         } else {
             // Subsequent login logic
@@ -105,7 +105,7 @@ class AuthController extends Controller
         ]);
     }
 
-    public function setPrimaryInformation($expired_at, $userId, $androidId, $osVersion, $deviceModel)
+    public function setPrimaryInformation($expired_at, $userId, $androidId, $osVersion, $deviceModel, $manufacturer)
     {
         $user = User::find($userId);
 
@@ -114,6 +114,7 @@ class AuthController extends Controller
         $user->android_id = $androidId;
         $user->os_version = $osVersion;
         $user->device_model = $deviceModel;
+        $user->manufacturer = $manufacturer;
 
         $user->save();
 
