@@ -17,7 +17,7 @@ class ConfigController extends Controller
 
         $support = Support::find($user->supporter_id);
 
-        $configs = Config::select('config')->where('is_active', 1)->where('account_type', '<=', $accountType)->get();
+        $configs = Config::select('config', 'internet_type', 'account_type')->where('is_active', 1)->get();
 
         return response()->json([
             'message' => "successful",
@@ -26,8 +26,10 @@ class ConfigController extends Controller
                 'supports' => json_decode($support->meta_data),
                 'user' => [
                     'days' => remainingDays($user->expired_at). ' روز ',
-                    'account_type' => convertToPersianTypeAccount($accountType),
+                    'account_type_translate' => convertToPersianTypeAccount($accountType),
+                    'account_type' => $accountType,
                     'device_model' => $user->device_model,
+                    'is_active' => $user->is_active
                 ]
             ]
         ]);

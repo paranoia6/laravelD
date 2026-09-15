@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Route;
 Route::prefix('v1')->group(function () {
 
     // Public
-    Route::get('/get-isp', [IspController::class, 'getIsp']);
+    Route::get('/isp-info', [IspController::class, 'getIsp']);
     Route::get('/alerts', [AlertController::class, 'index']);
     Route::post('/login', [AuthController::class, 'login']);
 

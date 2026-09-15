@@ -34,21 +34,24 @@ class IspController extends Controller
         curl_close($curl);
         $resp = unserialize($response);
 
-        $isp_name = 'نامشخص';
+        $ispName = 'نامشخص2';
+        $internetType = 3;
         if (isset($resp['isp'])) {
             $isp = $resp['isp'];
             $as = $resp ['as'];
             $company = Isp::query()->where('name', $as)->orWhere('isp', $isp)->first();
 
             if ($company) {
-                $isp_name = $company->persian_name;
+                $ispName = $company->persian_name;
+                $internetType = $company->internet_type;
             }
         }
 
         return response()->json([
             'message' => "successful",
             'data'    => [
-                'isp_name'      => $isp_name
+                'isp_name'      => $ispName,
+                'internet_type' => $internetType
             ]
         ]);
     }
