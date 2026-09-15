@@ -2,42 +2,40 @@
 
 namespace App\Http\Requests;
 
-use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
 class LoginRequest extends FormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     */
     public function authorize(): bool
     {
         return true;
     }
 
-    /**
-     * Prepare the data for validation.
-     */
-    protected function prepareForValidation(): void
-    {
-        $this->merge([
-            'android_id' => $this->header('X-Android-Id'),
-            'device_model' => $this->header('X-Device-Model'),
-            'os_version' => $this->header('X-Os-Version'),
-            'manufacturer' => $this->header('X-Manufacturer'),
-            'app_version' => $this->header('X-App-Version'),
-        ]);
-    }
-
-    /**
-     * Get the validation rules that apply to the request.
-     */
     public function rules(): array
     {
         return [
             'username' => [
                 'required',
-                'regex:/^[a-zA-Z0-9]+$/',
+                'string',
+                function ($attribute, $value, $fail) {
+                    $value = (string) $value;
+
+                    $isUsername = preg_match(
+                        '/^[A-Za-z0-9]+$/',
+                        $value
+                    );
+
+                    $isEmail = filter_var(
+                        $value,
+                        FILTER_VALIDATE_EMAIL
+                    );
+
+                    if (! $isUsername && ! $isEmail) {
+                        $fail(
+                            'نام کاربری فقط باید شامل حروف انگلیسی و اعداد باشد.'
+                        );
+                    }
+                },
             ],
 
             'password' => [
@@ -46,29 +44,39 @@ class LoginRequest extends FormRequest
             ],
 
             'android_id' => [
-                'required',
+                'nullable',
                 'string',
-            ],
-
-            'device_model' => [
-                'required',
-                'string',
+                'max:255',
             ],
 
             'os_version' => [
-                'required',
+                'nullable',
                 'string',
+                'max:255',
+            ],
+
+            'device_model' => [
+                'nullable',
+                'string',
+                'max:255',
             ],
 
             'manufacturer' => [
-                'required',
+                'nullable',
                 'string',
+                'max:255',
             ],
+        ];
+    }
 
-            'app_version' => [
-                'required',
-                'string',
-            ],
+    public function messages(): array
+    {
+        return [
+            'username.required' =>
+                'نام کاربری الزامی است.',
+
+            'password.required' =>
+                'کلمه عبور الزامی است.',
         ];
     }
 }

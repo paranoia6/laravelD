@@ -1,0 +1,59 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Laravel\Sanctum\HasApiTokens;
+
+class Account extends Authenticatable
+{
+    use HasApiTokens;
+
+    public const STATUS_ACTIVE = 'active';
+    public const STATUS_BLOCKED = 'blocked';
+
+    protected $fillable = [
+        'admin_id',
+        'plan_id',
+        'support_id',
+        'device_type',
+        'username',
+        'password',
+        'charged_amount',
+        'activated_at',
+        'first_login_at',
+        'expired_at',
+        'status',
+        'blocked_at',
+        'block_reason',
+    ];
+
+    protected function casts(): array
+    {
+        return [
+            'password' => 'encrypted',
+            'charged_amount' => 'integer',
+            'device_type' => 'integer',
+            'activated_at' => 'datetime',
+            'first_login_at' => 'datetime',
+            'expired_at' => 'datetime',
+            'blocked_at' => 'datetime',
+        ];
+    }
+
+    public function admin(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'admin_id');
+    }
+
+    public function plan(): BelongsTo
+    {
+        return $this->belongsTo(Plan::class);
+    }
+
+    public function support(): BelongsTo
+    {
+        return $this->belongsTo(Support::class, 'support_id');
+    }
+}
