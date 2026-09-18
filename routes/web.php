@@ -36,7 +36,7 @@ Route::post('/admin/logout', [AuthController::class, 'logout'])
     ->name('admin.logout');
 
 Route::get('/', function () {
-    return redirect()->route('admin.dashboard');
+    return redirect()->route('admin.login');
 });
 
 /*
