@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
 
             $table->string('email');
+            $table->string('name');
             $table->boolean('is_test')->default(false);
 
             $table->timestamp('email_verified_at')->nullable();
@@ -26,7 +27,7 @@ return new class extends Migration
             $table->string('password');
 
             $table->unsignedInteger('device_type')->default(1);
-            $table->integer('expired_type');
+            $table->integer('expired_type')->default(1);
 
             $table->dateTime('expired_at')->nullable();
             $table->dateTime('first_login_date')->nullable();
