@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Requests\LoginRequest;
+use App\Models\Account;
 use App\Models\Log;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -20,7 +21,7 @@ class AuthController extends Controller
         $email = $data['username'];
 
         // 2. Fetch User
-        $user = User::select('id', 'email', 'expired_type', 'expired_at', 'first_login_date', 'account_type',
+        $user = Account::select('id', 'email', 'expired_type', 'expired_at', 'first_login_date', 'account_type',
             'password', 'is_active', 'android_id', 'supporter_id', 'is_other_device_allow', 'is_test')
             ->where('email', $email)
             ->where('device_type', 1)
