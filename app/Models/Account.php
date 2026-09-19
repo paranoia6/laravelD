@@ -16,7 +16,7 @@ class Account extends Authenticatable
     protected $fillable = [
         'admin_id',
         'plan_id',
-        'support_id',
+        'supporter_id',
         'device_type',
         'username',
         'password',
@@ -29,10 +29,13 @@ class Account extends Authenticatable
         'block_reason',
     ];
 
+    protected $hidden = [
+        'password',
+    ];
+
     protected function casts(): array
     {
         return [
-            'password' => 'encrypted',
             'charged_amount' => 'integer',
             'device_type' => 'integer',
             'activated_at' => 'datetime',
@@ -54,6 +57,6 @@ class Account extends Authenticatable
 
     public function support(): BelongsTo
     {
-        return $this->belongsTo(Support::class, 'support_id');
+        return $this->belongsTo(Support::class, 'supporter_id');
     }
 }
