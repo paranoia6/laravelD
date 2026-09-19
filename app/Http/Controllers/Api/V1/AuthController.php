@@ -21,9 +21,9 @@ class AuthController extends Controller
         $email = $data['username'];
 
         // 2. Fetch User
-        $user = Account::select('id', 'email', 'expired_type', 'expired_at', 'first_login_date', 'account_type',
+        $user = Account::select('id', 'username', 'expired_type', 'expired_at', 'first_login_date', 'account_type',
             'password', 'is_active', 'android_id', 'supporter_id', 'is_other_device_allow', 'is_test')
-            ->where('email', $email)
+            ->where('username', $email)
             ->where('device_type', 1)
             ->first();
 
@@ -90,7 +90,7 @@ class AuthController extends Controller
 
         $userInformation = [
             'id'              => $user->id,
-            'email'           => $user->email,
+            'email'           => $user->username,
             'first_login_date'=> $firstLoginDate,
             'is_active'       => $user->is_active
         ];
@@ -108,7 +108,7 @@ class AuthController extends Controller
 
     public function setPrimaryInformation($expired_at, $userId, $androidId, $osVersion, $deviceModel, $manufacturer)
     {
-        $user = User::find($userId);
+        $user = Account::find($userId);
 
         $user->expired_at = $expired_at;
         $user->first_login_date = date('Y-m-d H:i:s', time());
