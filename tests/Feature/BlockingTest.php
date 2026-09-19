@@ -19,6 +19,7 @@ class BlockingTest extends TestCase
     private function createAdmin(array $extra = []): User
     {
         return User::create(array_merge([
+            'name' => 'Test Admin',
             'email' => 'admin_' . uniqid() . '@test.local',
             'password' => 'password123',
             'role' => 'admin',
@@ -38,6 +39,7 @@ class BlockingTest extends TestCase
     private function createSuperAdmin(array $extra = []): User
     {
         return User::create(array_merge([
+            'name' => 'Test Super Admin',
             'email' => 'super_' . uniqid() . '@test.local',
             'password' => 'password123',
             'role' => 'super_admin',
