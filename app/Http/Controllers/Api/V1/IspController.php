@@ -15,11 +15,11 @@ class IspController extends Controller
         //$_SERVER['REMOTE_ADDR']
         $ip = $_SERVER['REMOTE_ADDR'];
         $hostname = gethostbyaddr($ip);
-        $address = "http://ip-api.com/php/" . $hostname;
+        $token = "?token=35ffeb6559359c";
         $curl = curl_init();
 
         curl_setopt_array($curl, array(
-            CURLOPT_URL => $address,
+            CURLOPT_URL => 'https://api.ipinfo.io/lite/'.$hostname . $token,
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_ENCODING => '',
             CURLOPT_MAXREDIRS => 10,
@@ -32,26 +32,25 @@ class IspController extends Controller
         $response = curl_exec($curl);
 
         curl_close($curl);
-        $resp = unserialize($response);
+        $response = json_decode($response, true);
 
-        $ispName = 'نامشخص2';
-        $internetType = 3;
-        if (isset($resp['isp'])) {
-            $isp = $resp['isp'];
-            $as = $resp ['as'];
-            $company = Isp::query()->where('name', $as)->orWhere('isp', $isp)->first();
+        $isp_name = 'نامشخص';
+        $internet_type = 3;
+        if (isset($response['asn'])) {
+            $asName = $response['as_name'];
+            $asn = $response ['asn'];
+            $company = Isp::query()->where('asn', $asn)->orWhere('as_name', $asName)->first();
 
             if ($company) {
-                $ispName = $company->persian_name;
-                $internetType = $company->internet_type;
+                $isp_name = $company->persian_name;
+                $internet_type = $company->internet_type;
             }
         }
-
         return response()->json([
             'message' => "successful",
             'data'    => [
-                'isp_name'      => $ispName,
-                'internet_type' => $internetType
+                'isp_name'      => $isp_name,
+                'internet_type' => $internet_type
             ]
         ]);
     }
