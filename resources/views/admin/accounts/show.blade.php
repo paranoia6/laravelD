@@ -4,6 +4,7 @@
 
 @section('content')
 
+    ```
     <div class="container-fluid py-4">
 
         <div class="d-flex justify-content-between align-items-center mb-4">
@@ -106,14 +107,14 @@
                                     )
 
                                         <span class="badge bg-success">
-                                            فعال
-                                        </span>
+                                        فعال
+                                    </span>
 
                                     @else
 
                                         <span class="badge bg-danger">
-                                            مسدود
-                                        </span>
+                                        مسدود
+                                    </span>
 
                                     @endif
 
@@ -455,9 +456,9 @@
                                 <form
                                     method="POST"
                                     action="{{ route(
-                                        'admin.accounts.renew',
-                                        $account
-                                    ) }}"
+                                    'admin.accounts.renew',
+                                    $account
+                                ) }}"
                                     onsubmit="return confirmRenewal()"
                                 >
 
@@ -646,9 +647,9 @@
                             <form
                                 method="POST"
                                 action="{{ route(
-                                    'admin.accounts.block',
-                                    $account
-                                ) }}"
+                                'admin.accounts.block',
+                                $account
+                            ) }}"
                                 onsubmit="return confirmBlock()"
                             >
 
@@ -826,5 +827,6 @@
         }
 
     </script>
+    ```
 
 @endsection

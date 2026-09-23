@@ -99,6 +99,9 @@ class AccountController extends Controller
 
         /*
          * هر کاربر فقط Support خودش را می‌بیند.
+         *
+         * Support دیگر رابطه links ندارد و لینک‌ها
+         * داخل meta_data.links نگهداری می‌شوند.
          */
         $supports = Support::query()
             ->where(
@@ -110,13 +113,6 @@ class AccountController extends Controller
                     ->where('is_active', true)
                     ->orWhereNull('is_active');
             })
-            ->with([
-                'links' => function ($query) {
-                    $query
-                        ->where('is_active', true)
-                        ->orderBy('id');
-                },
-            ])
             ->orderBy('id')
             ->get();
 
@@ -199,11 +195,11 @@ class AccountController extends Controller
             })
             ->first();
 
-        if (! $support) {
+        if (! $support || ! $support->hasLinks()) {
             return back()
                 ->withErrors([
                     'support_id' =>
-                        'پشتیبانی انتخاب‌شده متعلق به حساب شما نیست یا غیرفعال است.',
+                        'پشتیبانی انتخاب‌شده متعلق به حساب شما نیست، غیرفعال است یا اطلاعاتی برای آن ثبت نشده است.',
                 ])
                 ->withInput();
         }
@@ -430,7 +426,6 @@ class AccountController extends Controller
             'admin',
             'plan',
             'support',
-            'support.links',
         ]);
 
         /*

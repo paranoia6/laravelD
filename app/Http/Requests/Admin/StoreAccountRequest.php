@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Admin;
 
 use App\Models\Plan;
+use App\Models\Support;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -185,20 +186,15 @@ class StoreAccountRequest extends FormRequest
         }
 
         /*
-         * Support باید واقعاً اطلاعات داشته باشد.
+         * Support باید واقعاً حداقل یک لینک فعال داشته باشد.
          */
-        $supportExists = \App\Models\SupportLink::query()
-            ->where(
-                'support_id',
-                $this->integer('support_id')
-            )
-            ->where(
-                'is_active',
-                true
-            )
-            ->exists();
+        $support = Support::query()
+            ->where('id', $this->integer('support_id'))
+            ->where('user_id', auth()->id())
+            ->where('is_active', true)
+            ->first();
 
-        if (! $supportExists) {
+        if (! $support || ! $support->hasLinks()) {
             abort(
                 redirect()
                     ->back()

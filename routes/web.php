@@ -83,18 +83,20 @@ Route::middleware('auth')->group(function () {
     Route::get('/admin/supports', [SupportController::class, 'index'])
         ->name('admin.supports');
 
+    Route::post('/admin/supports', [SupportController::class, 'store'])
+        ->name('admin.supports.store');
+
     Route::get('/admin/supports/{support}', [SupportController::class, 'show'])
         ->name('admin.supports.show');
 
-    Route::post('/admin/supports/{support}/links', [SupportController::class, 'store'])
-        ->name('admin.supports.store');
+    Route::patch('/admin/supports/{support}', [SupportController::class, 'update'])
+        ->name('admin.supports.update');
 
-    Route::delete('/admin/support-links/{supportLink}', [SupportController::class, 'destroy'])
-        ->name('admin.support-links.destroy');
+    Route::patch('/admin/supports/{support}/toggle', [SupportController::class, 'toggle'])
+        ->name('admin.supports.toggle');
 
-    Route::patch('/admin/support-links/{supportLink}/toggle', [SupportController::class, 'toggle'])
-        ->name('admin.support-links.toggle');
-
+    Route::delete('/admin/supports/{support}', [SupportController::class, 'destroy'])
+        ->name('admin.supports.destroy');
     /*
     |--------------------------------------------------------------------------
     | Alerts

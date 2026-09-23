@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Support;
-use App\Models\SupportLink;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -15,14 +14,7 @@ class SupportController extends Controller
     {
         $user = $request->user();
 
-        Support::ensureDefaultsFor($user);
-
         $supports = Support::query()
-            ->with([
-                'links' => function ($query) {
-                    $query->latest('id');
-                },
-            ])
             ->where('user_id', $user->id)
             ->orderBy('id')
             ->get();
@@ -44,12 +36,6 @@ class SupportController extends Controller
             abort(403);
         }
 
-        $support->load([
-            'links' => function ($query) {
-                $query->latest('id');
-            },
-        ]);
-
         return view(
             'admin.supports.show',
             compact('support')
@@ -57,13 +43,152 @@ class SupportController extends Controller
     }
 
     /**
-     * ثبت یک راه ارتباطی برای یک شبکه
+     * ایجاد یک Support جدید
      */
     public function store(
+        Request $request
+    ): RedirectResponse {
+        $user = $request->user();
+
+        $validated = $request->validate(
+            [
+                'name' => [
+                    'required',
+                    'string',
+                    'max:100',
+                ],
+
+                'links' => [
+                    'nullable',
+                    'array',
+                ],
+
+                'links.bale' => [
+                    'nullable',
+                    'string',
+                    'max:255',
+                ],
+
+                'links.eitaa' => [
+                    'nullable',
+                    'string',
+                    'max:255',
+                ],
+
+                'links.rubika' => [
+                    'nullable',
+                    'string',
+                    'max:255',
+                ],
+
+                'links.telegram' => [
+                    'nullable',
+                    'string',
+                    'max:255',
+                ],
+
+                'links.whatsapp' => [
+                    'nullable',
+                    'string',
+                    'max:255',
+                ],
+
+                'links.instagram' => [
+                    'nullable',
+                    'string',
+                    'max:255',
+                ],
+            ],
+            [
+                'name.required' =>
+                    'نام پشتیبانی الزامی است.',
+
+                'name.max' =>
+                    'نام پشتیبانی بیش از حد مجاز است.',
+            ]
+        );
+
+        $links = $validated['links'] ?? [];
+
+        $normalizedLinks = [];
+
+        foreach (
+            Support::networks()
+            as $network => $label
+        ) {
+            $value = trim(
+                (string) (
+                    $links[$network] ?? ''
+                )
+            );
+
+            if ($value === '') {
+                $normalizedLinks[$network] = '';
+
+                continue;
+            }
+
+            if (
+                ! Support::validateNetworkValue(
+                    $network,
+                    $value
+                )
+            ) {
+                return back()
+                    ->withInput()
+                    ->withErrors([
+                        "links.{$network}" =>
+                            "مقدار واردشده برای {$label} معتبر نیست.",
+                    ]);
+            }
+
+            $normalizedLinks[$network] =
+                Support::buildLink(
+                    $network,
+                    $value
+                );
+        }
+
+        $hasAtLeastOneLink = false;
+
+        foreach ($normalizedLinks as $link) {
+            if ($link !== '') {
+                $hasAtLeastOneLink = true;
+
+                break;
+            }
+        }
+
+        if (! $hasAtLeastOneLink) {
+            return back()
+                ->withInput()
+                ->withErrors([
+                    'links' =>
+                        'حداقل اطلاعات یک شبکه پشتیبانی را وارد کنید.',
+                ]);
+        }
+
+        $support = Support::createWithLinks(
+            (int) $user->id,
+            $validated['name'],
+            $normalizedLinks
+        );
+
+        return redirect()
+            ->route('admin.supports')
+            ->with(
+                'success',
+                "پشتیبانی «{$support->name}» با موفقیت ایجاد شد."
+            );
+    }
+
+    /**
+     * ویرایش Support
+     */
+    public function update(
         Request $request,
         Support $support
     ): RedirectResponse {
-
         if (
             (int) $support->user_id
             !== (int) $request->user()->id
@@ -71,198 +196,189 @@ class SupportController extends Controller
             abort(403);
         }
 
-        if (! $support->is_active) {
-            return back()->withErrors([
-                'support' =>
-                    'این شبکه پشتیبانی غیرفعال است.',
-            ]);
-        }
+        $validated = $request->validate(
+            [
+                'name' => [
+                    'required',
+                    'string',
+                    'max:100',
+                ],
 
-        /*
-         * برای هر شبکه فقط یک راه ارتباطی.
-         */
-        if ($support->links()->exists()) {
-            return back()->withErrors([
-                'support' =>
-                    'برای این شبکه قبلاً اطلاعات ثبت شده است.',
-            ]);
-        }
+                'links' => [
+                    'nullable',
+                    'array',
+                ],
 
-        $network =
-            $support->network_key;
+                'links.bale' => [
+                    'nullable',
+                    'string',
+                    'max:255',
+                ],
 
-        $rules = [
-            'value' => [
-                'required',
-                'string',
-                'max:255',
+                'links.eitaa' => [
+                    'nullable',
+                    'string',
+                    'max:255',
+                ],
+
+                'links.rubika' => [
+                    'nullable',
+                    'string',
+                    'max:255',
+                ],
+
+                'links.telegram' => [
+                    'nullable',
+                    'string',
+                    'max:255',
+                ],
+
+                'links.whatsapp' => [
+                    'nullable',
+                    'string',
+                    'max:255',
+                ],
+
+                'links.instagram' => [
+                    'nullable',
+                    'string',
+                    'max:255',
+                ],
             ],
-        ];
+            [
+                'name.required' =>
+                    'نام پشتیبانی الزامی است.',
 
-        $messages = [
-            'value.required' =>
-                'اطلاعات پشتیبانی الزامی است.',
+                'name.max' =>
+                    'نام پشتیبانی بیش از حد مجاز است.',
+            ]
+        );
 
-            'value.max' =>
-                'اطلاعات پشتیبانی بیش از حد مجاز است.',
-        ];
+        $links = $validated['links'] ?? [];
 
-        /*
-         * واتساپ = شماره
-         */
-        if ($network === 'whatsapp') {
+        $normalizedLinks = [];
 
-            $rules['value'][] =
-                'regex:/^[0-9]{8,15}$/';
+        foreach (
+            Support::networks()
+            as $network => $label
+        ) {
+            $value = trim(
+                (string) (
+                    $links[$network] ?? ''
+                )
+            );
 
-            $messages['value.regex'] =
-                'شماره واتساپ را با کد کشور، بدون + و فاصله وارد کنید. مثال: 989121234567';
+            if ($value === '') {
+                $normalizedLinks[$network] = '';
 
-        } else {
+                continue;
+            }
 
-            /*
-             * سایر پیام‌رسان‌ها = ID
-             */
-            $rules['value'][] =
-                'regex:/^[A-Za-z0-9_.-]+$/';
+            if (
+                ! Support::validateNetworkValue(
+                    $network,
+                    $value
+                )
+            ) {
+                return back()
+                    ->withInput()
+                    ->withErrors([
+                        "links.{$network}" =>
+                            "مقدار واردشده برای {$label} معتبر نیست.",
+                    ]);
+            }
 
-            $messages['value.regex'] =
-                'آیدی فقط می‌تواند شامل حروف انگلیسی، اعداد، نقطه، خط تیره و زیرخط باشد.';
+            $normalizedLinks[$network] =
+                Support::buildLink(
+                    $network,
+                    $value
+                );
         }
 
-        $validated =
-            $request->validate(
-                $rules,
-                $messages
-            );
+        $hasAtLeastOneLink = false;
 
-        $value =
-            trim($validated['value']);
+        foreach ($normalizedLinks as $link) {
+            if ($link !== '') {
+                $hasAtLeastOneLink = true;
 
-        $link =
-            $this->buildLink(
-                $network,
-                $value
-            );
+                break;
+            }
+        }
 
-        $title =
-            $support->network_label;
+        if (! $hasAtLeastOneLink) {
+            return back()
+                ->withInput()
+                ->withErrors([
+                    'links' =>
+                        'حداقل اطلاعات یک شبکه پشتیبانی را وارد کنید.',
+                ]);
+        }
 
-        SupportLink::create([
-            'support_id' =>
-                $support->id,
+        $support->name =
+            trim($validated['name']);
 
-            'title' =>
-                $title,
+        $support->setLinks(
+            $normalizedLinks
+        );
 
-            'link' =>
-                $link,
-
-            'is_active' =>
-                true,
-        ]);
+        $support->save();
 
         return redirect()
             ->route('admin.supports')
             ->with(
                 'success',
-                "اطلاعات {$title} با موفقیت ثبت شد."
+                "پشتیبانی «{$support->name}» با موفقیت ویرایش شد."
             );
     }
 
     /**
-     * فعال / غیرفعال کردن SupportLink
+     * فعال / غیرفعال کردن Support
      */
     public function toggle(
         Request $request,
-        SupportLink $supportLink
+        Support $support
     ): RedirectResponse {
-
-        $supportLink->load('support');
-
         if (
-            ! $supportLink->support
-            ||
-            (int) $supportLink->support->user_id
+            (int) $support->user_id
             !== (int) $request->user()->id
         ) {
             abort(403);
         }
 
-        $supportLink->update([
+        $support->update([
             'is_active' =>
-                ! $supportLink->is_active,
+                ! $support->is_active,
         ]);
 
         return back()->with(
             'success',
-            $supportLink->is_active
+            $support->is_active
                 ? 'پشتیبانی فعال شد.'
                 : 'پشتیبانی غیرفعال شد.'
         );
     }
 
     /**
-     * حذف SupportLink
+     * حذف Support
      */
     public function destroy(
         Request $request,
-        SupportLink $supportLink
+        Support $support
     ): RedirectResponse {
-
-        $supportLink->load('support');
-
         if (
-            ! $supportLink->support
-            ||
-            (int) $supportLink->support->user_id
+            (int) $support->user_id
             !== (int) $request->user()->id
         ) {
             abort(403);
         }
 
-        $supportLink->delete();
+        $support->delete();
 
-        return back()->with(
-            'success',
-            'اطلاعات پشتیبانی حذف شد.'
-        );
-    }
-
-    /**
-     * تبدیل مقدار واردشده به URL
-     */
-    private function buildLink(
-        string $network,
-        string $value
-    ): string {
-        return match ($network) {
-
-            'whatsapp' =>
-                'https://wa.me/' . $value,
-
-            'instagram' =>
-                'https://instagram.com/'
-                . ltrim($value, '@'),
-
-            'telegram' =>
-                'https://t.me/'
-                . ltrim($value, '@'),
-
-            'rubika' =>
-                'https://rubika.ir/'
-                . ltrim($value, '@'),
-
-            'eitaa' =>
-                'https://eitaa.com/'
-                . ltrim($value, '@'),
-
-            'bale' =>
-                'https://ble.ir/'
-                . ltrim($value, '@'),
-
-            default =>
-            $value,
-        };
+        return redirect()
+            ->route('admin.supports')
+            ->with(
+                'success',
+                'پشتیبانی با موفقیت حذف شد.'
+            );
     }
 }

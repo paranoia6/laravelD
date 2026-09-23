@@ -16,7 +16,7 @@ class Account extends Authenticatable
     protected $fillable = [
         'admin_id',
         'plan_id',
-        'supporter_id',
+        'support_id',
         'device_type',
         'username',
         'password',
@@ -47,7 +47,10 @@ class Account extends Authenticatable
 
     public function admin(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'admin_id');
+        return $this->belongsTo(
+            User::class,
+            'admin_id'
+        );
     }
 
     public function plan(): BelongsTo
@@ -57,6 +60,9 @@ class Account extends Authenticatable
 
     public function support(): BelongsTo
     {
-        return $this->belongsTo(Support::class, 'supporter_id');
+        return $this->belongsTo(
+            Support::class,
+            'support_id'
+        );
     }
 }

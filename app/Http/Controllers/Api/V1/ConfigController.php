@@ -25,7 +25,6 @@ class ConfigController extends Controller
         if ($authenticated instanceof Account) {
             $account = $authenticated->loadMissing([
                 'plan',
-                'support.links',
             ]);
 
             $accountType = $account->plan?->type === 'special'

@@ -338,59 +338,33 @@
                 </div>
 
 
-                {{-- SUPPORT --}}
-                <div class="form-card">
+               {{-- SUPPORT --}}
+<div class="form-card">
+    <h3>پشتیبانی</h3>
 
-                    <h3>
-                        پشتیبانی
-                    </h3>
+    <select name="support_id" class="form-control" required>
+        <option value="">انتخاب پشتیبانی</option>
 
+        @forelse($supports as $support)
+            <option
+                value="{{ $support->id }}"
+                {{ old('support_id') == $support->id ? 'selected' : '' }}
+            >
+                {{ $support->name }}
+            </option>
+        @empty
+            <option value="" disabled>
+                هنوز پشتیبانی برای حساب شما ثبت نشده است.
+            </option>
+        @endforelse
+    </select>
 
-                    <select
-                        name="support_id"
-                        class="form-control"
-                        required
-                    >
-
-                        <option value="">
-                            انتخاب پشتیبانی
-                        </option>
-
-
-                        @forelse($supports as $support)
-
-                            <option
-                                value="{{ $support->id }}"
-                                {{ old(
-                                    'support_id'
-                                ) == $support->id
-                                    ? 'selected'
-                                    : ''
-                                }}
-                            >
-                                {{ $support->name }}
-                            </option>
-
-                        @empty
-
-                            <option value="" disabled>
-                                هنوز پشتیبانی برای حساب شما ثبت نشده است.
-                            </option>
-
-                        @endforelse
-
-                    </select>
+    <small class="help">
+        هر اکانت باید حداقل یک پشتیبانی انتخاب کند.
+    </small>
+</div>
 
 
-                    @if($supports->isEmpty())
-
-                        <small class="help">
-                            ابتدا Support متعلق به حساب خودتان ایجاد کنید.
-                        </small>
-
-                    @endif
-
-                </div>
 
 
                 {{-- USERNAME --}}

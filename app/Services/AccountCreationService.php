@@ -17,7 +17,6 @@ class AccountCreationService
     ) {
     }
 
-
     public function create(
         User $admin,
         string $username,
@@ -27,7 +26,6 @@ class AccountCreationService
         int $deviceType,
         int $accountType
     ): Account {
-
         return DB::transaction(
             function () use (
                 $admin,
@@ -47,17 +45,14 @@ class AccountCreationService
                     ->lockForUpdate()
                     ->firstOrFail();
 
-
                 /*
                  * Admin فعال باشد
                  */
                 if (! $lockedAdmin->is_active) {
-
                     throw new RuntimeException(
                         'حساب Admin شما غیرفعال است.'
                     );
                 }
-
 
                 /*
                  * Role مجاز
@@ -72,12 +67,10 @@ class AccountCreationService
                         true
                     )
                 ) {
-
                     throw new RuntimeException(
                         'دسترسی ایجاد اکانت برای این کاربر وجود ندارد.'
                     );
                 }
-
 
                 /*
                  * پلن را lock می‌کنیم.
@@ -87,28 +80,23 @@ class AccountCreationService
                     ->lockForUpdate()
                     ->firstOrFail();
 
-
                 /*
                  * پلن فعال
                  */
                 if (! $lockedPlan->is_active) {
-
                     throw new RuntimeException(
                         'این پلن در حال حاضر غیرفعال است.'
                     );
                 }
 
-
                 /*
                  * قیمت مشخص شده
                  */
                 if ($lockedPlan->price === null) {
-
                     throw new RuntimeException(
                         'قیمت این پلن هنوز توسط Super Admin تعیین نشده است.'
                     );
                 }
-
 
                 /*
                  * تطابق نوع پلن
@@ -118,47 +106,38 @@ class AccountCreationService
                         ? 'special'
                         : 'normal';
 
-
                 if ($lockedPlan->type !== $expectedType) {
-
                     throw new RuntimeException(
                         'نوع پلن با نوع اکانت انتخاب‌شده هماهنگ نیست.'
                     );
                 }
 
-
                 /*
-                 * Support فقط متعلق به همان Admin/User
+                 * Support فقط متعلق به همان Admin/User باشد
+                 * و حداقل یک لینک داشته باشد.
                  */
-                $support = \App\Models\Support::query()
+                $support = Support::query()
                     ->whereKey($supportId)
                     ->where('user_id', $lockedAdmin->id)
                     ->where('is_active', true)
-                    ->whereHas('links', function ($query) {
-                        $query->where('is_active', true);
-                    })
                     ->first();
 
-                if (! $support) {
+                if (! $support || ! $support->hasLinks()) {
                     throw new RuntimeException(
                         'پشتیبانی انتخاب‌شده ثبت نشده یا اطلاعات آن کامل نیست.'
                     );
                 }
-
 
                 /*
                  * Username
                  */
                 $username = trim($username);
 
-
                 if ($username === '') {
-
                     throw new RuntimeException(
                         'نام کاربری نمی‌تواند خالی باشد.'
                     );
                 }
-
 
                 /*
                  * فقط حروف انگلیسی و اعداد
@@ -169,12 +148,10 @@ class AccountCreationService
                         $username
                     )
                 ) {
-
                     throw new RuntimeException(
                         'نام کاربری فقط باید شامل حروف انگلیسی و اعداد باشد.'
                     );
                 }
-
 
                 /*
                  * Unique
@@ -187,19 +164,16 @@ class AccountCreationService
                         )
                         ->exists()
                 ) {
-
                     throw new RuntimeException(
                         "نام کاربری {$username} قبلاً استفاده شده است."
                     );
                 }
-
 
                 /*
                  * قیمت واقعی
                  */
                 $price =
                     (int) $lockedPlan->price;
-
 
                 /*
                  * فقط Admin از Wallet پرداخت می‌کند.
@@ -210,12 +184,10 @@ class AccountCreationService
                     $lockedAdmin->role->value
                     === 'admin'
                 ) {
-
                     if (
                         (int) $lockedAdmin->balance
                         < $price
                     ) {
-
                         throw new RuntimeException(
                             'موجودی شما برای ایجاد این اکانت کافی نیست. '
                             . 'موجودی فعلی: '
@@ -225,7 +197,6 @@ class AccountCreationService
                             . ' تومان'
                         );
                     }
-
 
                     $this->walletService->debit(
                         $lockedAdmin,
@@ -237,12 +208,10 @@ class AccountCreationService
                     );
                 }
 
-
                 /*
                  * زمان فعال‌سازی
                  */
                 $activatedAt = now();
-
 
                 /*
                  * تاریخ انقضا
@@ -253,7 +222,6 @@ class AccountCreationService
                         ->addMonths(
                             (int) $lockedPlan->duration_months
                         );
-
 
                 /*
                  * ایجاد Account
@@ -280,7 +248,6 @@ class AccountCreationService
                     'status' => Account::STATUS_ACTIVE,
                 ]);
 
-
                 /*
                  * روابط برای صفحه نتیجه
                  */
@@ -289,12 +256,10 @@ class AccountCreationService
                     'support',
                 ]);
 
-
                 return $account;
             }
         );
     }
-
 
     /**
      * ساخت Username تصادفی
@@ -302,13 +267,11 @@ class AccountCreationService
     public function generateUsername(): string
     {
         do {
-
             $username =
                 'user'
                 . Str::lower(
                     Str::random(8)
                 );
-
         } while (
             Account::query()
                 ->where(
@@ -318,10 +281,8 @@ class AccountCreationService
                 ->exists()
         );
 
-
         return $username;
     }
-
 
     /**
      * ساخت Password
