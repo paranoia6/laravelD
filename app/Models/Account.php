@@ -21,8 +21,7 @@ class Account extends Authenticatable
         'username',
         'password',
         'charged_amount',
-        'activated_at',
-        'first_login_at',
+        'first_login_date',
         'expired_at',
         'status',
         'blocked_at',
@@ -38,8 +37,7 @@ class Account extends Authenticatable
         return [
             'charged_amount' => 'integer',
             'device_type' => 'integer',
-            'activated_at' => 'datetime',
-            'first_login_at' => 'datetime',
+            'first_login_date' => 'datetime',
             'expired_at' => 'datetime',
             'blocked_at' => 'datetime',
         ];

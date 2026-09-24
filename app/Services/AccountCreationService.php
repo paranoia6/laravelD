@@ -208,20 +208,6 @@ class AccountCreationService
                     );
                 }
 
-                /*
-                 * زمان فعال‌سازی
-                 */
-                $activatedAt = now();
-
-                /*
-                 * تاریخ انقضا
-                 */
-                $expiredAt =
-                    $activatedAt
-                        ->copy()
-                        ->addMonths(
-                            (int) $lockedPlan->duration_months
-                        );
 
                 /*
                  * ایجاد Account
@@ -238,11 +224,19 @@ class AccountCreationService
 
                     'charged_amount' => $price,
 
-                    // زمان ساخته‌شدن اکانت؛ برای قانون 72 ساعت
-                    'activated_at' => now(),
+                    /*
+                     * تاریخ ایجاد اکانت
+                     * از created_at خود Laravel استفاده می‌شود.
+                     */
 
-                    // اعتبار هنوز شروع نشده
-                    'first_login_at' => null,
+                    /*
+                     * اولین ورود هنوز انجام نشده
+                     */
+                    'first_login_date' => null,
+
+                    /*
+                     * اعتبار هنوز شروع نشده
+                     */
                     'expired_at' => null,
 
                     'status' => Account::STATUS_ACTIVE,

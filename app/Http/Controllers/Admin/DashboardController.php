@@ -41,17 +41,17 @@ class DashboardController extends Controller
 
             // فعال‌شده = اولین لاگین انجام شده
             'active_accounts' => (clone $accountQuery)
-                ->whereNotNull('first_login_at')
+                ->whereNotNull('first_login_date')
                 ->count(),
 
             // نام جدید برای استفاده‌های بعدی
             'activated_accounts' => (clone $accountQuery)
-                ->whereNotNull('first_login_at')
+                ->whereNotNull('first_login_date')
                 ->count(),
 
             // هنوز اولین لاگین انجام نشده
             'not_activated_accounts' => (clone $accountQuery)
-                ->whereNull('first_login_at')
+                ->whereNull('first_login_date')
                 ->count(),
 
             // ساخته‌شده امروز
@@ -68,7 +68,7 @@ class DashboardController extends Controller
             // در حال انقضا = حداکثر 7 روز مانده
             'expiring_accounts' => (clone $accountQuery)
                 ->where('status', Account::STATUS_ACTIVE)
-                ->whereNotNull('first_login_at')
+                ->whereNotNull('first_login_date')
                 ->whereNotNull('expired_at')
                 ->whereBetween('expired_at', [
                     now(),
@@ -84,10 +84,10 @@ class DashboardController extends Controller
 
             'blocked_under_72_hours' => (clone $accountQuery)
                 ->where('status', Account::STATUS_BLOCKED)
-                ->whereNotNull('activated_at')
+                ->whereNotNull('first_login_date')
                 ->whereNotNull('blocked_at')
                 ->whereRaw(
-                    'blocked_at <= DATE_ADD(activated_at, INTERVAL 72 HOUR)'
+                    'blocked_at <= DATE_ADD(first_login_date, INTERVAL 72 HOUR)'
                 )
                 ->count(),
 
@@ -99,10 +99,10 @@ class DashboardController extends Controller
 
             'blocked_over_72_hours' => (clone $accountQuery)
                 ->where('status', Account::STATUS_BLOCKED)
-                ->whereNotNull('activated_at')
+                ->whereNotNull('first_login_date')
                 ->whereNotNull('blocked_at')
                 ->whereRaw(
-                    'blocked_at > DATE_ADD(activated_at, INTERVAL 72 HOUR)'
+                    'blocked_at > DATE_ADD(first_login_date, INTERVAL 72 HOUR)'
                 )
                 ->count(),
         ];
@@ -162,12 +162,12 @@ class DashboardController extends Controller
 
                     // فعال‌شده = اولین لاگین
                     'createdAccounts as activated_accounts' => function ($query) {
-                        $query->whereNotNull('first_login_at');
+                        $query->whereNotNull('first_login_date');
                     },
 
                     // فعال‌نشده
                     'createdAccounts as not_activated_accounts' => function ($query) {
-                        $query->whereNull('first_login_at');
+                        $query->whereNull('first_login_date');
                     },
 
                     // کل مسدودها
@@ -185,10 +185,10 @@ class DashboardController extends Controller
                                 'status',
                                 Account::STATUS_BLOCKED
                             )
-                            ->whereNotNull('activated_at')
+                            ->whereNotNull('first_login_date')
                             ->whereNotNull('blocked_at')
                             ->whereRaw(
-                                'blocked_at <= DATE_ADD(activated_at, INTERVAL 72 HOUR)'
+                                'blocked_at <= DATE_ADD(first_login_date, INTERVAL 72 HOUR)'
                             );
                     },
 
@@ -199,10 +199,10 @@ class DashboardController extends Controller
                                 'status',
                                 Account::STATUS_BLOCKED
                             )
-                            ->whereNotNull('activated_at')
+                            ->whereNotNull('first_login_date')
                             ->whereNotNull('blocked_at')
                             ->whereRaw(
-                                'blocked_at > DATE_ADD(activated_at, INTERVAL 72 HOUR)'
+                                'blocked_at > DATE_ADD(first_login_date, INTERVAL 72 HOUR)'
                             );
                     },
 
@@ -234,7 +234,7 @@ class DashboardController extends Controller
                                 'status',
                                 Account::STATUS_ACTIVE
                             )
-                            ->whereNotNull('first_login_at')
+                            ->whereNotNull('first_login_date')
                             ->whereNotNull('expired_at')
                             ->whereBetween('expired_at', [
                                 now(),

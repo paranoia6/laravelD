@@ -76,17 +76,17 @@ class AuthController extends Controller
             |
             */
 
-            if ($account->first_login_at === null) {
+            if ($account->first_login_date === null) {
 
                 DB::transaction(function () use ($account) {
 
                     $account->refresh();
 
-                    if ($account->first_login_at === null) {
+                    if ($account->first_login_date === null) {
 
                         $now = now();
 
-                        $account->first_login_at = $now;
+                        $account->first_login_date = $now;
 
                         $account->expired_at =
                             $now->copy()->addMonths(
@@ -130,11 +130,11 @@ class AuthController extends Controller
 
             $firstLoginDate = null;
 
-            if ($account->first_login_at) {
+            if ($account->first_login_date) {
                 $firstLoginDate =
                     CalendarUtils::strftime(
                         'H:i:s d-m-Y',
-                        $account->first_login_at
+                        $account->first_login_date
                     );
             }
 
@@ -155,9 +155,6 @@ class AuthController extends Controller
 
                         'first_login_date' =>
                             $firstLoginDate,
-
-                        'first_login_at' =>
-                            $account->first_login_at,
 
                         'expired_at' =>
                             $account->expired_at,

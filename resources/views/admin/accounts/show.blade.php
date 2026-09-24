@@ -241,9 +241,9 @@
 
                                 <div class="form-control">
 
-                                    {{ $account->activated_at
+                                    {{ $account->created_at
                                         ? jalali_date(
-                                            $account->activated_at,
+                                            $account->created_at,
                                             'Y/m/d H:i:s'
                                         )
                                         : '---'
@@ -262,9 +262,9 @@
 
                                 <div class="form-control">
 
-                                    {{ $account->first_login_at
+                                    {{ $account->first_login_date
                                         ? jalali_date(
-                                            $account->first_login_at,
+                                            $account->first_login_date,
                                             'Y/m/d H:i:s'
                                         )
                                         : 'هنوز وارد نشده'
@@ -387,7 +387,7 @@
                         <div class="card-body">
 
                             @if(
-                                ! $account->first_login_at
+                                ! $account->first_login_date
                                 || ! $account->expired_at
                             )
 
@@ -591,12 +591,12 @@
 
                             @php
 
-                                $activatedAt =
-                                    $account->activated_at;
+                                $firstLoginDate =
+                                    $account->first_login_date;
 
                                 $hoursPassed =
-                                    $activatedAt
-                                        ? $activatedAt->diffInHours(now())
+                                    $firstLoginDate
+                                        ? $firstLoginDate->diffInHours(now())
                                         : null;
 
                                 $within72 =

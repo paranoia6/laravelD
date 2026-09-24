@@ -234,10 +234,10 @@
 
 
                                     <div class="account-meta-item">
-                                        <span>تاریخ فعال‌سازی</span>
+                                        <span>تاریخ ایجاد اکانت</span>
 
                                         <strong>
-                                            {{ $account['activated_at'] ?? '---' }}
+                                            {{ $account['created_at'] ?? '---' }}
                                         </strong>
                                     </div>
 
@@ -373,8 +373,8 @@
                             ' تومان\n' +
                             'پشتیبانی: ' +
                             (account.support || '---') + '\n' +
-                            'فعال‌سازی: ' +
-                            (account.activated_at || '---') + '\n' +
+                            'تاریخ ایجاد اکانت: ' +
+                            (account.created_at || '---') + '\n' +
                             'انقضا: ' +
                             (account.expired_at || '---');
 
@@ -416,8 +416,8 @@
                                 ' تومان\n' +
                                 'پشتیبانی: ' +
                                 (account.support || '---') + '\n' +
-                                'فعال‌سازی: ' +
-                                (account.activated_at || '---') + '\n' +
+                                'تاریخ ایجاد اکانت: ' +
+                                (account.created_at || '---') + '\n' +
                                 'انقضا: ' +
                                 (account.expired_at || '---')
                             );

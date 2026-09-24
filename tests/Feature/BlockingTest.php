@@ -80,7 +80,10 @@ class BlockingTest extends TestCase
             'username' => 'test_' . uniqid(),
             'password' => 'password',
             'charged_amount' => 375000,
-            'activated_at' => now()->subHours(24),
+
+            // اولین ورود موفق 24 ساعت قبل
+            'first_login_date' => now()->subHours(24),
+
             'expired_at' => now()->addMonth(),
             'status' => 'active',
         ]);
@@ -128,7 +131,10 @@ class BlockingTest extends TestCase
             'username' => 'test_' . uniqid(),
             'password' => 'password',
             'charged_amount' => 375000,
-            'activated_at' => now()->subHours(96),
+
+            // اولین ورود موفق 96 ساعت قبل
+            'first_login_date' => now()->subHours(96),
+
             'expired_at' => now()->addMonth(),
             'status' => 'active',
         ]);
@@ -171,7 +177,7 @@ class BlockingTest extends TestCase
             'username' => 'adminblock_' . uniqid(),
             'password' => 'password',
             'charged_amount' => 500000,
-            'activated_at' => now()->subDays(10),
+            'first_login_date' => now()->subDays(10),
             'expired_at' => now()->addMonth(),
             'status' => 'active',
         ]);
@@ -182,7 +188,7 @@ class BlockingTest extends TestCase
             'username' => 'independent_' . uniqid(),
             'password' => 'password',
             'charged_amount' => 500000,
-            'activated_at' => now()->subDays(10),
+            'first_login_date' => now()->subDays(10),
             'expired_at' => now()->addMonth(),
             'status' => 'blocked',
             'blocked_at' => now()->subDay(),
@@ -263,5 +269,6 @@ class BlockingTest extends TestCase
             'subject_type' => User::class,
             'subject_id' => $admin->id,
         ]);
+
     }
 }

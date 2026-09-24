@@ -112,7 +112,7 @@ class AccountRenewalService
              * قبل از اولین Login، expired_at برابر null است
              * و زمان اعتبار هنوز شروع نشده است.
              */
-            if (! $lockedAccount->first_login_at) {
+            if (! $lockedAccount->first_login_date) {
                 throw new RuntimeException(
                     'این اکانت هنوز اولین ورود را انجام نداده و قابل تمدید نیست.'
                 );

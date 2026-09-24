@@ -30,11 +30,11 @@ class ReportController extends Controller
             'total' => (clone $accountQuery)->count(),
 
             'activated' => (clone $accountQuery)
-                ->whereNotNull('first_login_at')
+                ->whereNotNull('first_login_date')
                 ->count(),
 
             'not_activated' => (clone $accountQuery)
-                ->whereNull('first_login_at')
+                ->whereNull('first_login_date')
                 ->count(),
 
             'today_created' => (clone $accountQuery)
@@ -49,7 +49,7 @@ class ReportController extends Controller
 
             'expiring' => (clone $accountQuery)
                 ->where('status', Account::STATUS_ACTIVE)
-                ->whereNotNull('first_login_at')
+                ->whereNotNull('first_login_date')
                 ->whereNotNull('expired_at')
                 ->whereBetween('expired_at', [
                     now(),
@@ -68,19 +68,19 @@ class ReportController extends Controller
 
             'blocked_under_72' => (clone $accountQuery)
                 ->where('status', Account::STATUS_BLOCKED)
-                ->whereNotNull('activated_at')
+                ->whereNotNull('first_login_date')
                 ->whereNotNull('blocked_at')
                 ->whereRaw(
-                    'blocked_at <= DATE_ADD(activated_at, INTERVAL 72 HOUR)'
+                    'blocked_at <= DATE_ADD(first_login_date, INTERVAL 72 HOUR)'
                 )
                 ->count(),
 
             'blocked_over_72' => (clone $accountQuery)
                 ->where('status', Account::STATUS_BLOCKED)
-                ->whereNotNull('activated_at')
+                ->whereNotNull('first_login_date')
                 ->whereNotNull('blocked_at')
                 ->whereRaw(
-                    'blocked_at > DATE_ADD(activated_at, INTERVAL 72 HOUR)'
+                    'blocked_at > DATE_ADD(first_login_date, INTERVAL 72 HOUR)'
                 )
                 ->count(),
         ];
@@ -101,17 +101,17 @@ class ReportController extends Controller
                     'createdAccounts as total_accounts',
 
                     'createdAccounts as activated_accounts' => function ($query) {
-                        $query->whereNotNull('first_login_at');
+                        $query->whereNotNull('first_login_date');
                     },
 
                     'createdAccounts as not_activated_accounts' => function ($query) {
-                        $query->whereNull('first_login_at');
+                        $query->whereNull('first_login_date');
                     },
 
                     'createdAccounts as expiring_accounts' => function ($query) {
                         $query
                             ->where('status', Account::STATUS_ACTIVE)
-                            ->whereNotNull('first_login_at')
+                            ->whereNotNull('first_login_date')
                             ->whereNotNull('expired_at')
                             ->whereBetween('expired_at', [
                                 now(),

@@ -400,7 +400,7 @@
                                         مسدود
                                     </span>
 
-                                    @elseif(!$account->first_login_at)
+                                    @elseif(!$account->first_login_date)
 
                                         <span class="report-badge report-badge-warning">
                                         فعال‌نشده
@@ -418,7 +418,7 @@
 
 
                                 <td>
-                                    {{ jalali_date($account->first_login_at) }}
+                                    {{ jalali_date($account->first_login_date) }}
                                 </td>
 
 

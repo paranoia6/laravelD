@@ -21,8 +21,9 @@ class AccountBlockService
      *
      * قوانین:
      * - فقط اکانت active قابل Block است.
-     * - activated_at باید وجود داشته باشد.
-     * - اگر <= 72 ساعت گذشته باشد، charged_amount کامل Refund می‌شود.
+     * - first_login_date باید وجود داشته باشد.
+     * - اگر <= 72 ساعت از اولین ورود موفق گذشته باشد،
+     *   charged_amount کامل Refund می‌شود.
      * - اگر > 72 ساعت گذشته باشد، نیاز به confirmation دارد.
      * - بیشتر از 72 ساعت هیچ Refund انجام نمی‌شود.
      * - Audit Log ثبت می‌شود.
@@ -96,20 +97,20 @@ class AccountBlockService
             }
 
             /*
-             * activated_at الزامی
+             * first_login_date الزامی است.
              */
-            if (! $account->activated_at) {
+            if (! $account->first_login_date) {
                 throw new RuntimeException(
-                    'زمان فعال‌سازی اکانت مشخص نیست.'
+                    'اولین ورود موفق اکانت هنوز ثبت نشده است.'
                 );
             }
 
             $now = now();
 
             /*
-             * محاسبه زمان واقعی از activated_at
+             * محاسبه زمان واقعی از اولین ورود موفق
              */
-            $hoursPassed = $account->activated_at->diffInHours($now);
+            $hoursPassed = $account->first_login_date->diffInHours($now);
 
             $under72Hours = $hoursPassed <= 72;
 
@@ -122,7 +123,7 @@ class AccountBlockService
                 && ! $confirmOver72Hours
             ) {
                 throw new RuntimeException(
-                    'بیش از ۷۲ ساعت از فعال‌سازی این اکانت گذشته است. برای مسدودسازی باید تأیید کنید.'
+                    'بیش از ۷۲ ساعت از اولین ورود موفق این اکانت گذشته است. برای مسدودسازی باید تأیید کنید.'
                 );
             }
 

@@ -178,21 +178,21 @@
                             && $account->expired_at
                             && $account->expired_at->isPast();
 
-                        $hoursSinceActivation =
-                            $account->activated_at
+                        $hoursSinceFirstLogin =
+                            $account->first_login_date
                                 ? $account
-                                    ->activated_at
+                                    ->first_login_date
                                     ->diffInHours(now())
                                 : null;
 
                         $canRefund =
                             ! $isBlocked
-                            && $hoursSinceActivation !== null
-                            && $hoursSinceActivation <= 72;
+                            && $hoursSinceFirstLogin !== null
+                            && $hoursSinceFirstLogin <= 72;
 
                         $canRenew =
                             ! $isBlocked
-                            && $account->first_login_at
+                            && $account->first_login_date
                             && $account->expired_at;
 
                     @endphp
@@ -260,9 +260,9 @@
 
                         <td>
 
-                            {{ $account->activated_at
+                            {{ $account->created_at
                                 ? jalali_date(
-                                    $account->activated_at,
+                                    $account->created_at,
                                     'Y/m/d H:i'
                                 )
                                 : '-'

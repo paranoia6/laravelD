@@ -338,9 +338,9 @@ class AccountController extends Controller
                     'charged_amount' =>
                         (int) $account
                             ->charged_amount,
-                    'activated_at' =>
+                    'created_at' =>
                         $account
-                            ->activated_at
+                            ->created_at
                             ?->toDateTimeString(),
                     'expired_at' =>
                         $account
