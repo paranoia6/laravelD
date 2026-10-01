@@ -16,8 +16,17 @@ class StoreAccountRequest extends FormRequest
                 auth()->user()->role->value,
                 ['admin', 'super_admin'],
                 true
-            )
-            && (bool) auth()->user()->is_active;
+            );
+    }
+
+    protected function prepareForValidation(): void
+    {
+        if ($this->boolean('is_test')) {
+            $this->merge([
+                'account_type' => 1,
+                'plan_id' => null,
+            ]);
+        }
     }
 
     public function rules(): array
@@ -35,8 +44,11 @@ class StoreAccountRequest extends FormRequest
                 Rule::in([1, 2]),
             ],
 
+            /*
+             * برای Test اصلاً Plan لازم نیست.
+             */
             'plan_id' => [
-                'required',
+                'nullable',
                 'integer',
                 'exists:plans,id',
             ],
@@ -48,14 +60,8 @@ class StoreAccountRequest extends FormRequest
                 Rule::exists('supports', 'id')
                     ->where(function ($query) {
                         $query
-                            ->where(
-                                'user_id',
-                                auth()->id()
-                            )
-                            ->where(
-                                'is_active',
-                                true
-                            );
+                            ->where('user_id', auth()->id())
+                            ->where('is_active', true);
                     }),
             ],
 
@@ -81,6 +87,11 @@ class StoreAccountRequest extends FormRequest
                 'min:1',
                 'max:1000',
             ],
+
+            'is_test' => [
+                'nullable',
+                'boolean',
+            ],
         ];
     }
 
@@ -98,9 +109,6 @@ class StoreAccountRequest extends FormRequest
 
             'account_type.in' =>
                 'نوع اکانت انتخاب‌شده معتبر نیست.',
-
-            'plan_id.required' =>
-                'پلن را انتخاب کنید.',
 
             'plan_id.exists' =>
                 'پلن انتخاب‌شده وجود ندارد.',
@@ -136,12 +144,24 @@ class StoreAccountRequest extends FormRequest
 
     protected function passedValidation(): void
     {
+        if ($this->boolean('is_test')) {
+            return;
+        }
+
         $plan = Plan::find(
             $this->integer('plan_id')
         );
 
         if (! $plan) {
-            return;
+            abort(
+                redirect()
+                    ->back()
+                    ->withInput()
+                    ->withErrors([
+                        'plan_id' =>
+                            'پلن را انتخاب کنید.',
+                    ])
+            );
         }
 
         if (! $plan->is_active) {
@@ -185,13 +205,19 @@ class StoreAccountRequest extends FormRequest
             );
         }
 
-        /*
-         * Support باید واقعاً حداقل یک لینک فعال داشته باشد.
-         */
         $support = Support::query()
-            ->where('id', $this->integer('support_id'))
-            ->where('user_id', auth()->id())
-            ->where('is_active', true)
+            ->where(
+                'id',
+                $this->integer('support_id')
+            )
+            ->where(
+                'user_id',
+                auth()->id()
+            )
+            ->where(
+                'is_active',
+                true
+            )
             ->first();
 
         if (! $support || ! $support->hasLinks()) {

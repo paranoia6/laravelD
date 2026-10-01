@@ -214,15 +214,6 @@
                                     </div>
 
 
-                                    <div class="account-meta-item">
-                                        <span>مبلغ</span>
-
-                                        <strong>
-                                            {{ number_format((int) $account['plan_price']) }}
-                                            تومان
-                                        </strong>
-                                    </div>
-
 
                                     <div class="account-meta-item">
                                         <span>پشتیبانی</span>
@@ -291,17 +282,13 @@
 
 
     <script>
-
         document.addEventListener('DOMContentLoaded', function () {
 
             async function copyText(value, button = null) {
-
                 try {
-
                     await navigator.clipboard.writeText(value);
 
                     if (button) {
-
                         const oldText = button.innerText;
 
                         button.innerText = 'کپی شد';
@@ -309,36 +296,24 @@
                         setTimeout(function () {
                             button.innerText = oldText;
                         }, 1200);
-
                     }
-
                 } catch (error) {
-
                     alert('کپی کردن انجام نشد.');
-
                 }
-
             }
-
 
             document
                 .querySelectorAll('.account-copy-button')
                 .forEach(function (button) {
-
                     button.addEventListener('click', function () {
-
                         copyText(
                             this.dataset.copy,
                             this
                         );
-
                     });
-
                 });
 
-
             const accounts = @json($createdAccounts);
-
 
             document
                 .querySelectorAll('.copy-account-button')
@@ -346,8 +321,11 @@
 
                     button.addEventListener('click', function () {
 
-                        const index = Number(this.dataset.index);
-                        const account = accounts[index];
+                        const index =
+                            Number(this.dataset.index);
+
+                        const account =
+                            accounts[index];
 
                         if (!account) {
                             return;
@@ -358,19 +336,20 @@
                             'Username: ' + account.username + '\n' +
                             'Password: ' + account.password + '\n' +
                             'نوع اکانت: ' +
-                            ((Number(account.account_type) === 1)
-                                ? 'عادی'
-                                : 'ویژه') + '\n' +
+                            (
+                                Number(account.account_type) === 1
+                                    ? 'عادی'
+                                    : 'ویژه'
+                            ) + '\n' +
                             'دستگاه: ' +
-                            ((Number(account.device_type) === 1)
-                                ? 'اندروید'
-                                : 'آیفون') + '\n' +
+                            (
+                                Number(account.device_type) === 1
+                                    ? 'اندروید'
+                                    : 'آیفون'
+                            ) + '\n' +
                             'مدت: ' +
                             account.duration_months +
                             ' ماه\n' +
-                            'مبلغ: ' +
-                            Number(account.plan_price).toLocaleString('en-US') +
-                            ' تومان\n' +
                             'پشتیبانی: ' +
                             (account.support || '---') + '\n' +
                             'تاریخ ایجاد اکانت: ' +
@@ -379,60 +358,59 @@
                             (account.expired_at || '---');
 
                         copyText(text, this);
-
                     });
-
                 });
 
-
             const copyAllButton =
-                document.getElementById('copy-all-accounts');
-
+                document.getElementById(
+                    'copy-all-accounts'
+                );
 
             if (copyAllButton) {
 
-                copyAllButton.addEventListener('click', function () {
+                copyAllButton.addEventListener(
+                    'click',
+                    function () {
 
-                    const text = accounts
-                        .map(function (account) {
+                        const text = accounts
+                            .map(function (account) {
 
-                            return (
-                                'Account #' + account.id + '\n' +
-                                'Username: ' + account.username + '\n' +
-                                'Password: ' + account.password + '\n' +
-                                'نوع اکانت: ' +
-                                ((Number(account.account_type) === 1)
-                                    ? 'عادی'
-                                    : 'ویژه') + '\n' +
-                                'دستگاه: ' +
-                                ((Number(account.device_type) === 1)
-                                    ? 'اندروید'
-                                    : 'آیفون') + '\n' +
-                                'مدت: ' +
-                                account.duration_months +
-                                ' ماه\n' +
-                                'مبلغ: ' +
-                                Number(account.plan_price).toLocaleString('en-US') +
-                                ' تومان\n' +
-                                'پشتیبانی: ' +
-                                (account.support || '---') + '\n' +
-                                'تاریخ ایجاد اکانت: ' +
-                                (account.created_at || '---') + '\n' +
-                                'انقضا: ' +
-                                (account.expired_at || '---')
+                                return (
+                                    'Account #' + account.id + '\n' +
+                                    'Username: ' + account.username + '\n' +
+                                    'Password: ' + account.password + '\n' +
+                                    'نوع اکانت: ' +
+                                    (
+                                        Number(account.account_type) === 1
+                                            ? 'عادی'
+                                            : 'ویژه'
+                                    ) + '\n' +
+                                    'دستگاه: ' +
+                                    (
+                                        Number(account.device_type) === 1
+                                            ? 'اندروید'
+                                            : 'آیفون'
+                                    ) + '\n' +
+                                    'مدت: ' +
+                                    account.duration_months +
+                                    ' ماه\n' +
+                                    'پشتیبانی: ' +
+                                    (account.support || '---') + '\n' +
+                                    'تاریخ ایجاد اکانت: ' +
+                                    (account.created_at || '---') + '\n' +
+                                    'انقضا: ' +
+                                    (account.expired_at || '---')
+                                );
+
+                            })
+                            .join(
+                                '\n\n--------------------\n\n'
                             );
 
-                        })
-                        .join('\n\n--------------------\n\n');
-
-                    copyText(text, this);
-
-                });
-
+                        copyText(text, this);
+                    }
+                );
             }
-
         });
-
     </script>
-
 @endsection

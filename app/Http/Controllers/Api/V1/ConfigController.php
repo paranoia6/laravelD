@@ -12,12 +12,6 @@ use Illuminate\Support\Facades\Auth;
 
 class ConfigController extends Controller
 {
-    /*
-    |--------------------------------------------------------------------------
-    | Manager's original getConfigs
-    |--------------------------------------------------------------------------
-    */
-
     public function getConfigs()
     {
         $user = Auth::user();
@@ -25,13 +19,28 @@ class ConfigController extends Controller
 
         $support = Support::find($user->supporter_id);
 
-        $configs = Config::select('config', 'internet_type', 'account_type')
+        $configs = Config::query()
+            ->with('country:id,name,code,flag')
+            ->select('id', 'config', 'country_id', 'internet_type', 'account_type')
             ->where('is_active', 1)
-            ->get();
+            ->get()
+            ->map(fn (Config $config) => [
+                'id' => $config->id,
+                'config' => $config->config,
+                'country' => $config->country ? [
+                    'name' => $config->country->name,
+                    'code' => $config->country->code,
+                    'flag' => $config->country->flag,
+                ] : null,
+                'country_name' => $config->country?->name,
+                'country_flag' => $config->country?->flag,
+                'internet_type' => $config->internet_type,
+                'account_type' => $config->account_type,
+            ]);
 
         return response()->json([
-            'message' => "successful",
-            'data'    => [
+            'message' => 'successful',
+            'data' => [
                 'configs' => $configs,
                 'supports' => json_decode($support->meta_data),
                 'user' => [
@@ -45,21 +54,9 @@ class ConfigController extends Controller
         ]);
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | New Account / Legacy User config response
-    |--------------------------------------------------------------------------
-    */
-
     public function getAccountConfigs(Request $request)
     {
         $authenticated = Auth::user();
-
-        /*
-        |--------------------------------------------------------------------------
-        | New Account authentication
-        |--------------------------------------------------------------------------
-        */
 
         if ($authenticated instanceof Account) {
             $account = $authenticated->loadMissing([
@@ -70,10 +67,6 @@ class ConfigController extends Controller
                 ? 2
                 : 1;
 
-            /*
-             * Account is already tied to a support owned by its creator.
-             * Do not trust arbitrary support IDs from the request.
-             */
             $support = $account->support;
 
             if (
@@ -86,19 +79,24 @@ class ConfigController extends Controller
                 $support = null;
             }
 
-            /*
-             * Preserve the old config response shape.
-             */
             $configs = Config::query()
-                ->select('config')
+                ->with('country:id,name,code,flag')
+                ->select('id', 'config', 'country_id')
                 ->where('is_active', true)
                 ->where('account_type', '<=', $accountType)
-                ->get();
+                ->get()
+                ->map(fn (Config $config) => [
+                    'id' => $config->id,
+                    'config' => $config->config,
+                    'country' => $config->country ? [
+                        'name' => $config->country->name,
+                        'code' => $config->country->code,
+                        'flag' => $config->country->flag,
+                    ] : null,
+                    'country_name' => $config->country?->name,
+                    'country_flag' => $config->country?->flag,
+                ]);
 
-            /*
-             * Before first login the account has no expiry yet.
-             * After first login, show remaining days.
-             */
             $days = $account->expired_at
                 ? remainingDays($account->expired_at) . ' روز '
                 : 'فعال نشده';
@@ -109,12 +107,9 @@ class ConfigController extends Controller
 
             return response()->json([
                 'message' => 'successful',
-
                 'data' => [
                     'configs' => $configs,
-
                     'supports' => $support?->meta_data ?? [],
-
                     'user' => [
                         'id' => $account->id,
                         'username' => $account->username,
@@ -126,12 +121,6 @@ class ConfigController extends Controller
                 ],
             ]);
         }
-
-        /*
-        |--------------------------------------------------------------------------
-        | Legacy User authentication
-        |--------------------------------------------------------------------------
-        */
 
         if ($authenticated instanceof User) {
             $user = $authenticated;
@@ -149,10 +138,22 @@ class ConfigController extends Controller
             }
 
             $configs = Config::query()
-                ->select('config')
+                ->with('country:id,name,code,flag')
+                ->select('id', 'config', 'country_id')
                 ->where('is_active', true)
                 ->where('account_type', '<=', $accountType)
-                ->get();
+                ->get()
+                ->map(fn (Config $config) => [
+                    'id' => $config->id,
+                    'config' => $config->config,
+                    'country' => $config->country ? [
+                        'name' => $config->country->name,
+                        'code' => $config->country->code,
+                        'flag' => $config->country->flag,
+                    ] : null,
+                    'country_name' => $config->country?->name,
+                    'country_flag' => $config->country?->flag,
+                ]);
 
             $accountTypeLabel = function_exists('convertToPersianTypeAccount')
                 ? convertToPersianTypeAccount($accountType)
@@ -160,12 +161,9 @@ class ConfigController extends Controller
 
             return response()->json([
                 'message' => 'successful',
-
                 'data' => [
                     'configs' => $configs,
-
                     'supports' => $support?->meta_data ?? [],
-
                     'user' => [
                         'id' => $user->id,
                         'email' => $user->email,
@@ -176,12 +174,6 @@ class ConfigController extends Controller
                 ],
             ]);
         }
-
-        /*
-        |--------------------------------------------------------------------------
-        | Unknown authenticated model
-        |--------------------------------------------------------------------------
-        */
 
         return response()->json([
             'message' => 'حساب کاربری معتبر نیست.',

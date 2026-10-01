@@ -26,27 +26,20 @@
     </div>
 
     @if(session('success'))
-        <div class="config-alert success">
-            {{ session('success') }}
-        </div>
+        <div class="config-alert success">{{ session('success') }}</div>
     @endif
 
     @if($errors->any())
-        <div class="config-alert danger">
-            {{ $errors->first() }}
-        </div>
+        <div class="config-alert danger">{{ $errors->first() }}</div>
     @endif
 
-
-    {{-- فقط Super Admin می‌تواند کانفیگ اضافه کند --}}
     @if(auth()->user()->role->value === 'super_admin')
-
         <div class="config-card">
 
             <div class="config-card-header">
                 <div>
                     <h3>افزودن کانفیگ</h3>
-                    <span>کانفیگ را برای نوع حساب و نوع اینترنت مشخص کنید.</span>
+                    <span>کانفیگ را برای کشور، نوع حساب و نوع اینترنت مشخص کنید.</span>
                 </div>
             </div>
 
@@ -54,6 +47,22 @@
                 @csrf
 
                 <div class="config-form-grid">
+
+                    <div>
+                        <label>کشور</label>
+
+                        <select name="country_id" required>
+                            <option value="">انتخاب کشور</option>
+
+                            @foreach($countries as $country)
+                                <option
+                                    value="{{ $country->id }}"
+                                    @selected(old('country_id') == $country->id)>
+                                    {{ $country->flag }} {{ $country->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
 
                     <div>
                         <label>نوع کانفیگ</label>
@@ -71,7 +80,6 @@
                         </select>
                     </div>
 
-
                     <div>
                         <label>نوع اینترنت</label>
 
@@ -88,7 +96,6 @@
                         </select>
                     </div>
 
-
                     <div>
                         <label>توضیحات</label>
 
@@ -99,7 +106,6 @@
                             placeholder="مثلاً سرور اصلی"
                             required>
                     </div>
-
 
                     <div class="config-form-full">
                         <label>محتوای کانفیگ</label>
@@ -112,7 +118,6 @@
                             required>{{ old('config') }}</textarea>
                     </div>
 
-
                     <div class="config-checkbox">
                         <label>
                             <input
@@ -124,7 +129,6 @@
                         </label>
                     </div>
 
-
                     <div class="config-submit">
                         <button type="submit">
                             ذخیره کانفیگ
@@ -132,15 +136,10 @@
                     </div>
 
                 </div>
-
             </form>
 
         </div>
-
     @endif
-
-
-    {{-- لیست کانفیگ‌ها --}}
 
     <div class="config-list">
 
@@ -151,11 +150,22 @@
                 <div class="config-item-main">
 
                     <div class="config-item-title">
-                        {{ $accountTypes[$config->account_type] ?? 'نامشخص' }}
+
+                        @if($config->country)
+                            <span>
+                                {{ $config->country->flag }}
+                                {{ $config->country->name }}
+                            </span>
+                        @else
+                            <span>🌐 کشور انتخاب نشده</span>
+                        @endif
 
                         <span class="config-badge">
+                            {{ $accountTypes[$config->account_type] ?? 'نامشخص' }}
+                            -
                             {{ $internetTypes[$config->internet_type] ?? 'نامشخص' }}
                         </span>
+
                     </div>
 
                     <div class="config-description">
@@ -167,7 +177,6 @@
                     </div>
 
                 </div>
-
 
                 <div class="config-item-action">
 
@@ -190,7 +199,6 @@
         @endforelse
 
     </div>
-
 
     @if($configs->hasPages())
         <div class="config-pagination">

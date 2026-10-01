@@ -70,24 +70,21 @@ class AdminController extends Controller
         StoreAdminRequest $request
     ) {
         User::create([
-            'email' =>
-                $request
-                    ->string('email')
-                    ->toString(),
+            'email' => $request
+                ->string('email')
+                ->toString(),
 
-            'password' =>
-                $request
-                    ->string('password')
-                    ->toString(),
+            'password' => $request
+                ->string('password')
+                ->toString(),
 
-            'role' =>
-                'admin',
+            'role' => 'admin',
 
-            'balance' =>
-                0,
+            'balance' => 0,
 
-            'is_active' =>
-                true,
+            'is_active' => true,
+
+            'expired_type' => 1,
         ]);
 
 
@@ -181,9 +178,8 @@ class AdminController extends Controller
             $walletService->adjustCredit(
                 $user,
                 (int) $validated['amount'],
-                $validated['description']
-                ?? null,
-                $request->user()
+                $request->user(),
+                $validated['description'] ?? null
             );
 
 

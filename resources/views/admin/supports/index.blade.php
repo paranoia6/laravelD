@@ -352,54 +352,7 @@
                         </div>
 
 
-                        <div class="support-actions">
 
-                            <form
-                                method="POST"
-                                action="{{ route(
-                                    'admin.supports.toggle',
-                                    $support
-                                ) }}"
-                            >
-
-                                @csrf
-                                @method('PATCH')
-
-                                <button
-                                    type="submit"
-                                    class="btn btn-light"
-                                >
-                                    {{ $support->is_active
-                                        ? 'غیرفعال کردن'
-                                        : 'فعال کردن'
-                                    }}
-                                </button>
-
-                            </form>
-
-
-                            <form
-                                method="POST"
-                                action="{{ route(
-                                    'admin.supports.destroy',
-                                    $support
-                                ) }}"
-                                onsubmit="return confirm('این پشتیبانی حذف شود؟')"
-                            >
-
-                                @csrf
-                                @method('DELETE')
-
-                                <button
-                                    type="submit"
-                                    class="btn btn-danger"
-                                >
-                                    حذف
-                                </button>
-
-                            </form>
-
-                        </div>
 
                     </div>
 

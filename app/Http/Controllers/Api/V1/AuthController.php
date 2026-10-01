@@ -72,7 +72,13 @@ class AuthController extends Controller
             | First Login
             |--------------------------------------------------------------------------
             |
-            | اعتبار اکانت فقط همین‌جا شروع می‌شود.
+            | اعتبار اکانت فقط از اولین ورود موفق شروع می‌شود.
+            |
+            | Test Account:
+            | دقیقاً ۲۴ ساعت از اولین ورود اعتبار دارد.
+            |
+            | Normal Account:
+            | مدت اعتبار طبق Plan محاسبه می‌شود.
             |
             */
 
@@ -80,21 +86,49 @@ class AuthController extends Controller
 
                 DB::transaction(function () use ($account) {
 
-                    $account->refresh();
+                    $lockedAccount = Account::query()
+                        ->whereKey($account->id)
+                        ->lockForUpdate()
+                        ->firstOrFail();
 
-                    if ($account->first_login_date === null) {
-
-                        $now = now();
-
-                        $account->first_login_date = $now;
-
-                        $account->expired_at =
-                            $now->copy()->addMonths(
-                                (int) $account->plan->duration_months
-                            );
-
-                        $account->save();
+                    if ($lockedAccount->first_login_date !== null) {
+                        return;
                     }
+
+                    $now = now();
+
+                    $lockedAccount->first_login_date = $now;
+
+                    if ($lockedAccount->is_test) {
+
+                        /*
+                         * اکانت تست:
+                         * ۲۴ ساعت از اولین ورود.
+                         */
+                        $lockedAccount->expired_at =
+                            $now->copy()->addHours(24);
+
+                    } else {
+
+                        /*
+                         * اکانت معمولی:
+                         * اعتبار طبق پلن.
+                         */
+                        if (! $lockedAccount->plan) {
+                            throw new \RuntimeException(
+                                'پلن این اکانت مشخص نیست.'
+                            );
+                        }
+
+                        $lockedAccount->expired_at =
+                            $now->copy()->addMonths(
+                                (int) $lockedAccount
+                                    ->plan
+                                    ->duration_months
+                            );
+                    }
+
+                    $lockedAccount->save();
                 });
 
                 $account->refresh();
@@ -161,6 +195,9 @@ class AuthController extends Controller
 
                         'is_active' =>
                             $account->status === Account::STATUS_ACTIVE,
+
+                        'is_test' =>
+                            (bool) $account->is_test,
                     ],
                 ],
             ]);
@@ -243,6 +280,7 @@ class AuthController extends Controller
                 $data['device_model'] ?? null,
                 $data['manufacturer'] ?? null
             );
+
         } else {
 
             if (! $user->is_active) {
@@ -322,6 +360,7 @@ class AuthController extends Controller
         $user = User::find($userId);
 
         $user->expired_at = $expiredAt;
+
         $user->first_login_date =
             now();
 

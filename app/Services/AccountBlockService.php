@@ -108,18 +108,39 @@ class AccountBlockService
             $now = now();
 
             /*
-             * محاسبه زمان واقعی از اولین ورود موفق
+             * Super Admin محدودیت 72 ساعت و نیاز به تأیید ندارد.
              */
-            $hoursPassed = $account->first_login_date->diffInHours($now);
-
-            $under72Hours = $hoursPassed <= 72;
+            $isSuperAdmin = $actor instanceof User
+                && $actor->role->value === 'super_admin';
 
             /*
-             * بیشتر از 72 ساعت:
-             * بدون تأیید اجازه Block نداریم.
+             * اگر اولین ورود ثبت شده باشد، زمان واقعی را محاسبه می‌کنیم.
+             * Super Admin حتی قبل از اولین ورود هم می‌تواند Block کند.
+             */
+            $hoursPassed = $account->first_login_date
+                ? $account->first_login_date->diffInHours($now)
+                : 0;
+
+            $under72Hours = $account->first_login_date
+                ? $hoursPassed <= 72
+                : false;
+
+            /*
+             * Admin معمولی بعد از 72 ساعت نیاز به تأیید دارد.
+             * Super Admin بدون این محدودیت می‌تواند Block کند.
              */
             if (
-                ! $under72Hours
+                ! $isSuperAdmin
+                && ! $account->first_login_date
+            ) {
+                throw new RuntimeException(
+                    'اولین ورود موفق اکانت هنوز ثبت نشده است.'
+                );
+            }
+
+            if (
+                ! $isSuperAdmin
+                && ! $under72Hours
                 && ! $confirmOver72Hours
             ) {
                 throw new RuntimeException(

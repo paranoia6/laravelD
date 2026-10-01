@@ -31,14 +31,31 @@
         </div>
     @endif
 
+    @if($errors->any())
+        <div class="config-alert danger">
+            {{ $errors->first() }}
+        </div>
+    @endif
+
     <div class="config-card">
 
         <div class="config-item-title">
-            {{ $accountTypes[$config->account_type] ?? 'نامشخص' }}
+
+            @if($config->country)
+                <span>
+                    {{ $config->country->flag }}
+                    {{ $config->country->name }}
+                </span>
+            @else
+                <span>🌐 کشور انتخاب نشده</span>
+            @endif
 
             <span class="config-badge">
+                {{ $accountTypes[$config->account_type] ?? 'نامشخص' }}
+                -
                 {{ $internetTypes[$config->internet_type] ?? 'نامشخص' }}
             </span>
+
         </div>
 
         <div class="config-description">
@@ -60,6 +77,22 @@
                 @method('PUT')
 
                 <div class="config-form-grid">
+
+                    <div>
+                        <label>کشور</label>
+
+                        <select name="country_id" required>
+                            <option value="">انتخاب کشور</option>
+
+                            @foreach($countries as $country)
+                                <option
+                                    value="{{ $country->id }}"
+                                    @selected($config->country_id == $country->id)>
+                                    {{ $country->flag }} {{ $country->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
 
                     <div>
                         <label>نوع کانفیگ</label>

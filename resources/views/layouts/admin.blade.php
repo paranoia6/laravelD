@@ -4,11 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <link rel="stylesheet" href="{{ asset('css/admin-theme.css') }}">
-
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>@yield('title', 'پنل مدیریت') | SH</title>
+    <title>@yield('title', 'پنل مدیریت') | دوپینگ</title>
 
     @vite([
         'resources/css/app.css',

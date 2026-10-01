@@ -17,12 +17,10 @@ use Illuminate\Support\Str;
 use Illuminate\View\View;
 use RuntimeException;
 use Throwable;
+use Illuminate\Support\Facades\DB;
 
 class AccountController extends Controller
 {
-    /**
-     * لیست اکانت‌ها
-     */
     public function index(Request $request): View
     {
         $user = $request->user();
@@ -39,10 +37,6 @@ class AccountController extends Controller
             ])
             ->latest('id');
 
-        /*
-         * Admin فقط اکانت‌های خودش را می‌بیند.
-         * Super Admin همه اکانت‌ها را می‌بیند.
-         */
         if ($user->role->value === 'admin') {
             $query->where(
                 'admin_id',
@@ -50,9 +44,6 @@ class AccountController extends Controller
             );
         }
 
-        /*
-         * سرچ Username
-         */
         if ($search !== '') {
             $query->where(
                 'username',
@@ -74,19 +65,35 @@ class AccountController extends Controller
         );
     }
 
-    /**
-     * صفحه ساخت اکانت
-     */
     public function create(Request $request): View
     {
         $user = $request->user();
 
-        /*
-         * فقط پلن‌های فعال و قیمت‌گذاری‌شده
-         */
         $plans = Plan::query()
             ->where('is_active', true)
-            ->whereNotNull('price')
+            ->where(function ($query) use ($user) {
+                $query
+                    ->where(function ($query) {
+                        $query
+                            ->where('type', 'normal')
+                            ->where('duration_months', 1);
+                    })
+                    ->orWhere(function ($query) {
+                        $query->where('type', 'normal');
+                    })
+                    ->orWhere(function ($query) {
+                        $query->where('type', 'special');
+                    });
+            })
+            ->where(function ($query) {
+                $query
+                    ->whereNotNull('price')
+                    ->orWhere(function ($query) {
+                        $query
+                            ->where('type', 'normal')
+                            ->where('duration_months', 1);
+                    });
+            })
             ->orderByRaw("
                 CASE
                     WHEN type = 'normal' THEN 1
@@ -97,12 +104,6 @@ class AccountController extends Controller
             ->orderBy('duration_months')
             ->get();
 
-        /*
-         * هر کاربر فقط Support خودش را می‌بیند.
-         *
-         * Support دیگر رابطه links ندارد و لینک‌ها
-         * داخل meta_data.links نگهداری می‌شوند.
-         */
         $supports = Support::query()
             ->where(
                 'user_id',
@@ -130,9 +131,6 @@ class AccountController extends Controller
         );
     }
 
-    /**
-     * ساخت یک یا چند اکانت
-     */
     public function store(
         StoreAccountRequest $request,
         AccountCreationService $creationService
@@ -141,45 +139,72 @@ class AccountController extends Controller
 
         $user = $request->user();
 
+        $isTest = (bool) (
+            $validated['is_test'] ?? false
+        );
+
         /*
-         * پلن را دوباره از DB می‌گیریم.
+         * برای Test، Request خودش plan_id را به
+         * پلن عادی ۱ ماهه تبدیل کرده است.
          */
         $plan = Plan::query()
             ->where('is_active', true)
-            ->whereNotNull('price')
-            ->find(
-                $validated['plan_id']
-            );
+            ->when(
+                $isTest,
+                function ($query) {
+                    $query
+                        ->where('type', 'normal')
+                        ->where('duration_months', 1);
+                }
+            )
+            ->whereNotNull('id')
+            ->when(
+                ! $isTest,
+                function ($query) use ($validated) {
+                    $query
+                        ->whereKey(
+                            $validated['plan_id']
+                        )
+                        ->whereNotNull('price');
+                }
+            )
+            ->when(
+                $isTest,
+                function ($query) use ($validated) {
+                    $query->whereKey(
+                        $validated['plan_id']
+                    );
+                }
+            )
+            ->first();
 
         if (! $plan) {
             return back()
                 ->withErrors([
                     'plan_id' =>
-                        'پلن انتخاب‌شده معتبر یا فعال نیست.',
+                        $isTest
+                            ? 'پلن عادی ۱ ماهه برای ساخت اکانت تست وجود ندارد.'
+                            : 'پلن انتخاب‌شده معتبر یا فعال نیست.',
                 ])
                 ->withInput();
         }
 
-        /*
-         * نوع پلن
-         */
-        $expectedType =
-            (int) $validated['account_type'] === 2
-                ? 'special'
-                : 'normal';
+        if (! $isTest) {
+            $expectedType =
+                (int) $validated['account_type'] === 2
+                    ? 'special'
+                    : 'normal';
 
-        if ($plan->type !== $expectedType) {
-            return back()
-                ->withErrors([
-                    'plan_id' =>
-                        'پلن انتخاب‌شده با نوع اکانت هماهنگ نیست.',
-                ])
-                ->withInput();
+            if ($plan->type !== $expectedType) {
+                return back()
+                    ->withErrors([
+                        'plan_id' =>
+                            'پلن انتخاب‌شده با نوع اکانت هماهنگ نیست.',
+                    ])
+                    ->withInput();
+            }
         }
 
-        /*
-         * Support فقط متعلق به خود کاربر
-         */
         $support = Support::query()
             ->whereKey(
                 $validated['support_id']
@@ -208,15 +233,16 @@ class AccountController extends Controller
             $validated['quantity'] ?? 1
         );
 
-        $totalPrice =
-            (int) $plan->price
-            * $quantity;
-
         /*
-         * Super Admin محدودیت موجودی ندارد.
+         * Test رایگان است.
          */
+        $totalPrice = $isTest
+            ? 0
+            : (int) $plan->price * $quantity;
+
         if (
-            $user->role->value === 'admin'
+            ! $isTest
+            && $user->role->value === 'admin'
             && (int) $user->balance < $totalPrice
         ) {
             return back()
@@ -235,131 +261,114 @@ class AccountController extends Controller
         $createdAccounts = [];
 
         try {
-            for (
-                $i = 0;
-                $i < $quantity;
-                $i++
+            DB::transaction(function () use (
+                &$createdAccounts,
+                $creationService,
+                $user,
+                $plan,
+                $support,
+                $validated,
+                $quantity,
+                $isTest
             ) {
+                if ($isTest && $user->role->value === 'admin') {
+                    $lockedAdmin = $user->newQuery()
+                        ->whereKey($user->id)
+                        ->lockForUpdate()
+                        ->firstOrFail();
 
-                /*
-                 * ساخت Username
-                 */
-                if (
-                    ($validated['username_mode'] ?? 'random')
-                    === 'prefix'
-                ) {
+                    $existingTestCount = Account::query()
+                        ->where('admin_id', $lockedAdmin->id)
+                        ->where('is_test', true)
+                        ->count();
 
-                    $prefix = (string) (
-                        $validated['username_prefix']
-                        ?? ''
-                    );
-
-                    do {
-                        $username =
-                            $prefix
-                            . Str::lower(
-                                Str::random(8)
-                            );
-                    } while (
-                        Account::query()
-                            ->where(
-                                'username',
-                                $username
-                            )
-                            ->exists()
-                    );
-
-                } else {
-
-                    do {
-                        $username =
-                            'user'
-                            . Str::lower(
-                                Str::random(8)
-                            );
-                    } while (
-                        Account::query()
-                            ->where(
-                                'username',
-                                $username
-                            )
-                            ->exists()
-                    );
+                    if ($existingTestCount + $quantity > 5) {
+                        throw new RuntimeException(
+                            'هر Admin فقط ۵ اکانت تست می‌تواند بسازد. سهمیه باقی‌مانده: '
+                            . max(0, 5 - $existingTestCount)
+                        );
+                    }
                 }
 
-                /*
-                 * Password
-                 */
-                $password =
-                    $creationService
-                        ->generatePassword();
+                $mode = $validated['username_mode'] ?? 'random';
+                $prefix = trim(
+                    (string) ($validated['username_prefix'] ?? '')
+                );
 
-                /*
-                 * ساخت اکانت
-                 */
-                $account =
-                    $creationService->create(
-                        $user,
-                        $username,
-                        $password,
-                        $plan,
-                        (int) $support->id,
-                        (int) $validated['device_type'],
-                        (int) $validated['account_type']
-                    );
+                for ($i = 0; $i < $quantity; $i++) {
+                    if ($mode === 'prefix') {
+                        $username = $prefix;
+                        $sequence = 2;
 
-                /*
-                 * اطلاعات نتیجه
-                 */
-                $createdAccounts[] = [
-                    'id' => $account->id,
-                    'username' => $username,
-                    'password' => $password,
-                    'plan_id' => $account->plan_id,
-                    'duration_months' =>
-                        (int) $account
-                            ->plan
-                            ->duration_months,
-                    'plan_price' =>
-                        (int) $account
-                            ->charged_amount,
-                    'support_id' =>
-                        (int) $account
-                            ->support_id,
-                    'support' =>
-                        $account
-                            ->support?->name
-                        ?? '---',
-                    'device_type' =>
-                        (int) $account
-                            ->device_type,
-                    'account_type' =>
-                        (int) $validated['account_type'],
-                    'charged_amount' =>
-                        (int) $account
-                            ->charged_amount,
-                    'created_at' =>
-                        $account
-                            ->created_at
-                            ?->toDateTimeString(),
-                    'expired_at' =>
-                        $account
-                            ->expired_at
-                            ?->toDateTimeString(),
-                ];
-            }
+                        while (
+                        Account::query()
+                            ->where('username', $username)
+                            ->exists()
+                        ) {
+                            $username = $prefix . $sequence;
+                            $sequence++;
+                        }
+                    } else {
+                        $username =
+                            $creationService->generateUsername();
+                    }
+
+                    $password =
+                        $creationService->generatePassword();
+
+                    $account =
+                        $creationService->create(
+                            $user,
+                            $username,
+                            $password,
+                            $plan,
+                            (int) $support->id,
+                            (int) $validated['device_type'],
+                            $isTest
+                                ? 1
+                                : (int) $validated['account_type'],
+                            $isTest
+                        );
+
+                    $createdAccounts[] = [
+                        'id' => $account->id,
+                        'username' => $username,
+                        'password' => $password,
+                        'plan_id' => $account->plan_id,
+                        'duration_months' =>
+                            (int) $account->plan->duration_months,
+                        'plan_price' =>
+                            (int) $account->charged_amount,
+                        'support_id' =>
+                            (int) $account->support_id,
+                        'support' =>
+                            $account->support?->name ?? '---',
+                        'device_type' =>
+                            (int) $account->device_type,
+                        'account_type' =>
+                            $isTest
+                                ? 1
+                                : (int) $validated['account_type'],
+                        'charged_amount' =>
+                            (int) $account->charged_amount,
+                        'is_test' =>
+                            (bool) $account->is_test,
+                        'created_at' =>
+                            $account->created_at?->toDateTimeString(),
+                        'expired_at' =>
+                            $account->expired_at?->toDateTimeString(),
+                    ];
+                }
+            });
 
             return redirect()
-                ->route(
-                    'admin.accounts.result'
-                )
+                ->route('admin.accounts.result')
                 ->with(
                     'created_accounts',
                     $createdAccounts
                 );
 
         } catch (RuntimeException $e) {
-
             return back()
                 ->withErrors([
                     'account' =>
@@ -368,7 +377,6 @@ class AccountController extends Controller
                 ->withInput();
 
         } catch (Throwable $e) {
-
             report($e);
 
             return back()
@@ -380,9 +388,6 @@ class AccountController extends Controller
         }
     }
 
-    /**
-     * نتیجه ساخت اکانت
-     */
     public function result(
         Request $request
     ): View {
@@ -402,18 +407,12 @@ class AccountController extends Controller
         );
     }
 
-    /**
-     * جزئیات اکانت
-     */
     public function show(
         Request $request,
         Account $account
     ): View {
         $user = $request->user();
 
-        /*
-         * Admin فقط اکانت خودش.
-         */
         if (
             $user->role->value === 'admin'
             && (int) $account->admin_id
@@ -428,12 +427,6 @@ class AccountController extends Controller
             'support',
         ]);
 
-        /*
-         * پلن‌های مناسب برای تمدید
-         *
-         * فقط پلن فعال، قیمت‌گذاری‌شده
-         * و هم‌نوع اکانت فعلی.
-         */
         $renewalPlans = Plan::query()
             ->where('is_active', true)
             ->whereNotNull('price')
@@ -458,9 +451,6 @@ class AccountController extends Controller
         );
     }
 
-    /**
-     * تمدید اکانت
-     */
     public function renew(
         RenewAccountRequest $request,
         Account $account,
@@ -468,9 +458,6 @@ class AccountController extends Controller
     ): RedirectResponse {
         $user = $request->user();
 
-        /*
-         * Admin فقط اکانت خودش.
-         */
         if (
             $user->role->value === 'admin'
             && (int) $account->admin_id
@@ -495,9 +482,6 @@ class AccountController extends Controller
                 ]);
         }
 
-        /*
-         * نوع پلن تمدید باید با نوع اکانت یکی باشد.
-         */
         if (
             $account->plan?->type
             && $plan->type
@@ -511,7 +495,6 @@ class AccountController extends Controller
         }
 
         try {
-
             $renewedAccount =
                 $renewalService->renew(
                     $user,
@@ -539,7 +522,6 @@ class AccountController extends Controller
                 );
 
         } catch (RuntimeException $e) {
-
             return back()
                 ->withErrors([
                     'renew' =>
@@ -547,7 +529,6 @@ class AccountController extends Controller
                 ]);
 
         } catch (Throwable $e) {
-
             report($e);
 
             return back()
@@ -558,9 +539,6 @@ class AccountController extends Controller
         }
     }
 
-    /**
-     * مسدود کردن اکانت
-     */
     public function block(
         Request $request,
         Account $account,
@@ -568,9 +546,6 @@ class AccountController extends Controller
     ): RedirectResponse {
         $user = $request->user();
 
-        /*
-         * Admin فقط اکانت خودش
-         */
         if (
             $user->role->value === 'admin'
             && (int) $account->admin_id
@@ -596,7 +571,6 @@ class AccountController extends Controller
             );
 
         try {
-
             $result =
                 $blockService->block(
                     $account,
@@ -618,7 +592,6 @@ class AccountController extends Controller
                 );
 
             if ($under72Hours) {
-
                 if ($refundAmount > 0) {
                     return redirect()
                         ->route(
@@ -655,7 +628,6 @@ class AccountController extends Controller
                 );
 
         } catch (RuntimeException $e) {
-
             return back()
                 ->withErrors([
                     'account' =>
@@ -663,7 +635,6 @@ class AccountController extends Controller
                 ]);
 
         } catch (Throwable $e) {
-
             report($e);
 
             return back()

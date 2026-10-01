@@ -1,5 +1,4 @@
-@import url('https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css');
-
+@import url('https://cdn.jsdelivr.net/gh/rastikerdar/vazir-font@v30.1.0/dist/font-face.css');
 :root {
     --brand: #ec4899;
     --brand-dark: #db2777;
@@ -5713,4 +5712,16 @@ body.admin-body {
     .admin-main {
         margin-right: 0 !important;
     }
+}
+
+html,
+body,
+button,
+input,
+textarea,
+select,
+option,
+.admin-body,
+.admin-body * {
+    font-family: Vazir, Tahoma, sans-serif !important;
 }

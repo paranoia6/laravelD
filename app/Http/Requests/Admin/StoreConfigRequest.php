@@ -17,6 +17,7 @@ class StoreConfigRequest extends FormRequest
     {
         return [
             'config' => ['required', 'string'],
+            'country_id' => ['required', 'integer', 'exists:countries,id'],
             'internet_type' => ['required', 'integer', Rule::in([1, 2, 3])],
             'account_type' => ['required', 'integer', Rule::in([1, 2])],
             'descriptions' => ['required', 'string', 'max:255'],
@@ -28,6 +29,8 @@ class StoreConfigRequest extends FormRequest
     {
         return [
             'config.required' => 'محتوای کانفیگ الزامی است.',
+            'country_id.required' => 'کشور را انتخاب کنید.',
+            'country_id.exists' => 'کشور انتخاب‌شده معتبر نیست.',
             'internet_type.required' => 'نوع اینترنت را انتخاب کنید.',
             'internet_type.in' => 'نوع اینترنت باید بین ۱ تا ۳ باشد.',
             'account_type.required' => 'نوع کانفیگ را انتخاب کنید.',

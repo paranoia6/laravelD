@@ -21,6 +21,7 @@ class Account extends Authenticatable
         'username',
         'password',
         'charged_amount',
+        'is_test',
         'first_login_date',
         'expired_at',
         'status',
@@ -36,6 +37,7 @@ class Account extends Authenticatable
     {
         return [
             'charged_amount' => 'integer',
+            'is_test' => 'boolean',
             'device_type' => 'integer',
             'first_login_date' => 'datetime',
             'expired_at' => 'datetime',
@@ -45,10 +47,7 @@ class Account extends Authenticatable
 
     public function admin(): BelongsTo
     {
-        return $this->belongsTo(
-            User::class,
-            'admin_id'
-        );
+        return $this->belongsTo(User::class, 'admin_id');
     }
 
     public function plan(): BelongsTo
@@ -58,9 +57,6 @@ class Account extends Authenticatable
 
     public function support(): BelongsTo
     {
-        return $this->belongsTo(
-            Support::class,
-            'support_id'
-        );
+        return $this->belongsTo(Support::class, 'support_id');
     }
 }
