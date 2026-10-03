@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AccountGeneratorController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/admin/login', function () {
@@ -9,7 +10,9 @@ Route::get('/admin/login', function () {
 Route::get('/', function () {
     return view('welcome');
 });
-Route::redirect('/demo', '/demo/dashboard');
 
-Route::view('/demo/dashboard', 'dashboard.index')->name('demo.dashboard');
-Route::view('/demo/users', 'users.index')->name('demo.users');
+Route::get('/accounts/generator', [AccountGeneratorController::class, 'create'])
+    ->name('accounts.generator');
+
+Route::post('/accounts/generator', [AccountGeneratorController::class, 'store'])
+    ->name('accounts.generator.store');
