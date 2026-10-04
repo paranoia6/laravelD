@@ -22,7 +22,7 @@ return new class extends Migration
 
             $table->unsignedTinyInteger('device_type')->default(1);
 
-            $table->unsignedBigInteger('support_id')->nullable();
+            $table->unsignedBigInteger('supporter_id')->nullable();
 
             $table->string('username')->unique();
             $table->string('password');
@@ -42,10 +42,10 @@ return new class extends Migration
             $table->timestamps();
 
             $table->index(['admin_id', 'status']);
-            $table->index('support_id');
+            $table->index('supporter_id');
             $table->index('first_login_date');
 
-            $table->foreign('support_id')
+            $table->foreign('supporter_id')
                 ->references('id')
                 ->on('supports')
                 ->nullOnDelete();
