@@ -10,19 +10,19 @@ class Account extends Authenticatable
 {
     use HasApiTokens;
 
-    public const STATUS_ACTIVE = 'active';
-    public const STATUS_BLOCKED = 'blocked';
+    public const STATUS_ACTIVE = 1;
+    public const STATUS_BLOCKED = 0;
 
     protected $fillable = [
         'admin_id',
         'plan_id',
-        'supporter_id',
         'device_type',
+        'supporter_id',
         'username',
         'password',
         'charged_amount',
-        'activated_at',
-        'first_login_at',
+        'is_test',
+        'first_login_date',
         'expired_at',
         'status',
         'blocked_at',
@@ -36,11 +36,15 @@ class Account extends Authenticatable
     protected function casts(): array
     {
         return [
-            'charged_amount' => 'integer',
+            'admin_id' => 'integer',
+            'plan_id' => 'integer',
             'device_type' => 'integer',
-            'activated_at' => 'datetime',
-            'first_login_at' => 'datetime',
+            'supporter_id' => 'integer',
+            'charged_amount' => 'integer',
+            'is_test' => 'boolean',
+            'first_login_date' => 'datetime',
             'expired_at' => 'datetime',
+            'status' => 'integer',
             'blocked_at' => 'datetime',
         ];
     }

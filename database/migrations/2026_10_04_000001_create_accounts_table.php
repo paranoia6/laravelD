@@ -34,7 +34,7 @@ return new class extends Migration
             $table->dateTime('first_login_date')->nullable();
             $table->dateTime('expired_at')->nullable();
 
-            $table->string('status')->default('active');
+            $table->unsignedTinyInteger('status')->default(1);
 
             $table->dateTime('blocked_at')->nullable();
             $table->string('block_reason')->nullable();
