@@ -6,23 +6,21 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('users', function (Blueprint $table) {
             $table->id();
 
             $table->string('email');
+
+            $table->string('role')->default('admin');
+            $table->unsignedBigInteger('balance')->default(0);
+
             $table->boolean('is_test')->default(false);
 
             $table->timestamp('email_verified_at')->nullable();
 
-            // قدیمی
             $table->string('pass')->nullable();
-
-            // Laravel Auth
             $table->string('password');
 
             $table->unsignedInteger('device_type')->default(1);
@@ -32,6 +30,9 @@ return new class extends Migration
             $table->dateTime('first_login_date')->nullable();
 
             $table->boolean('is_active')->default(true);
+
+            $table->dateTime('admin_blocked_at')->nullable();
+            $table->string('admin_block_reason')->nullable();
 
             $table->dateTime('suspend_at')->nullable();
 
@@ -61,7 +62,6 @@ return new class extends Migration
             $table->softDeletes();
 
             $table->timestamps();
-
         });
 
         Schema::create('password_reset_tokens', function (Blueprint $table) {
@@ -80,9 +80,6 @@ return new class extends Migration
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('sessions');
