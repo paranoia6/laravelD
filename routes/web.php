@@ -2,12 +2,18 @@
 
 use App\Http\Controllers\AccountGeneratorController;
 use App\Http\Controllers\Admin\PlanController;
+use App\Http\Controllers\Admin\AuthController;
 use App\Http\Controllers\Admin\TicketController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/admin/login', function () {
-    return 'Admin Login';
-})->name('admin.login');
+Route::get('/admin/login', [AuthController::class, 'showLogin'])
+    ->name('admin.login');
+
+Route::post('/admin/login', [AuthController::class, 'login'])
+    ->name('admin.login.submit');
+
+Route::post('/admin/logout', [AuthController::class, 'logout'])
+    ->name('admin.logout');
 
 Route::get('/', function () {
     return view('welcome');
