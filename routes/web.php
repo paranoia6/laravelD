@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\AccountGeneratorController;
+use App\Http\Controllers\Admin\PlanController;
 use App\Http\Controllers\Admin\SupportController;
 use Illuminate\Support\Facades\Route;
 
@@ -10,10 +12,23 @@ Route::get('/admin/login', function () {
 Route::get('/', function () {
     return view('welcome');
 });
+
 Route::redirect('/demo', '/demo/dashboard');
 
 Route::view('/demo/dashboard', 'dashboard.index')->name('demo.dashboard');
 Route::view('/demo/users', 'users.index')->name('demo.users');
+
+Route::get('/accounts/generator', [AccountGeneratorController::class, 'create'])
+    ->name('accounts.generator');
+
+Route::post('/accounts/generator', [AccountGeneratorController::class, 'store'])
+    ->name('accounts.generator.store');
+
+Route::get('/admin/plans', [PlanController::class, 'index'])
+    ->name('admin.plans');
+
+Route::patch('/admin/plans/{plan}', [PlanController::class, 'update'])
+    ->name('admin.plans.update');
 
 Route::get('/admin/supports', [SupportController::class, 'index'])->name('admin.supports');
 Route::post('/admin/supports', [SupportController::class, 'store'])->name('admin.supports.store');
