@@ -10,9 +10,9 @@ class Account extends Authenticatable
 {
     use HasApiTokens;
 
-    public const STATUS_ACTIVE = 1;
+    public const STATUS_ACTIVE = 'active';
 
-    public const STATUS_BLOCKED = 0;
+    public const STATUS_BLOCKED = 'blocked';
 
     protected $fillable = [
         'admin_id',
@@ -21,10 +21,21 @@ class Account extends Authenticatable
         'supporter_id',
         'username',
         'password',
-        'charged_amount',
+        'expired_type',
+        'account_type',
+        'device_model',
+        'android_id',
         'is_test',
-        'first_login_date',
+        'os_version',
+        'is_other_device_allow',
+        'try_login',
+        'last_seen',
+        'manufacturer',
+        'app_version_code',
+        'charged_amount',
         'expired_at',
+        'first_login_date',
+        'is_active',
         'status',
         'blocked_at',
         'block_reason',
@@ -41,11 +52,16 @@ class Account extends Authenticatable
             'plan_id' => 'integer',
             'device_type' => 'integer',
             'supporter_id' => 'integer',
-            'charged_amount' => 'integer',
+            'expired_type' => 'integer',
+            'account_type' => 'integer',
             'is_test' => 'boolean',
-            'first_login_date' => 'datetime',
+            'is_other_device_allow' => 'boolean',
+            'try_login' => 'integer',
+            'charged_amount' => 'integer',
             'expired_at' => 'datetime',
-            'status' => 'integer',
+            'first_login_date' => 'datetime',
+            'last_seen' => 'datetime',
+            'is_active' => 'boolean',
             'blocked_at' => 'datetime',
         ];
     }
