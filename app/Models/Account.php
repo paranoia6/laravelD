@@ -2,8 +2,8 @@
 
 namespace App\Models;
 
-use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Foundation\Auth\User as Authenticatable;
 use Laravel\Sanctum\HasApiTokens;
 
 class Account extends Authenticatable
@@ -11,6 +11,7 @@ class Account extends Authenticatable
     use HasApiTokens;
 
     public const STATUS_ACTIVE = 1;
+
     public const STATUS_BLOCKED = 0;
 
     protected $fillable = [
