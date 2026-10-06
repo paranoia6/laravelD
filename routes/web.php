@@ -3,11 +3,18 @@
 use App\Http\Controllers\AccountGeneratorController;
 use App\Http\Controllers\Admin\PlanController;
 use App\Http\Controllers\Admin\SupportController;
+use App\Http\Controllers\Admin\AuthController;
+use App\Http\Controllers\Admin\TicketController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/admin/login', function () {
-    return 'Admin Login';
-})->name('admin.login');
+Route::get('/admin/login', [AuthController::class, 'showLogin'])
+    ->name('admin.login');
+
+Route::post('/admin/login', [AuthController::class, 'login'])
+    ->name('admin.login.submit');
+
+Route::post('/admin/logout', [AuthController::class, 'logout'])
+    ->name('admin.logout');
 
 Route::get('/', function () {
     return view('welcome');
@@ -36,3 +43,20 @@ Route::get('/admin/supports/{support}', [SupportController::class, 'show'])->nam
 Route::patch('/admin/supports/{support}', [SupportController::class, 'update'])->name('admin.supports.update');
 Route::patch('/admin/supports/{support}/toggle', [SupportController::class, 'toggle'])->name('admin.supports.toggle');
 Route::delete('/admin/supports/{support}', [SupportController::class, 'destroy'])->name('admin.supports.destroy');
+Route::get('/admin/tickets', [TicketController::class, 'index'])
+    ->name('admin.tickets');
+
+Route::get('/admin/tickets/create', [TicketController::class, 'create'])
+    ->name('admin.tickets.create');
+
+Route::post('/admin/tickets', [TicketController::class, 'store'])
+    ->name('admin.tickets.store');
+
+Route::get('/admin/tickets/{ticket}', [TicketController::class, 'show'])
+    ->name('admin.tickets.show');
+
+Route::post('/admin/tickets/{ticket}/reply', [TicketController::class, 'reply'])
+    ->name('admin.tickets.reply');
+
+Route::patch('/admin/tickets/{ticket}/status', [TicketController::class, 'status'])
+    ->name('admin.tickets.status');
