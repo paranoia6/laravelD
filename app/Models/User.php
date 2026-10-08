@@ -39,6 +39,20 @@ class User extends Authenticatable
             'admin_blocked_at' => 'datetime',
             'deleted_at' => 'datetime',
             'password' => 'hashed',
+            'balance' => 'integer',
         ];
     }
+    public function walletTransactions(): HasMany
+    {
+        return $this->hasMany(WalletTransaction::class);
+    }
+
+    public function createdWalletTransactions(): HasMany
+    {
+        return $this->hasMany(
+            WalletTransaction::class,
+            'created_by'
+        );
+    }
+
 }
