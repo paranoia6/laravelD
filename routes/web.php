@@ -4,6 +4,7 @@ use App\Http\Controllers\AccountGeneratorController;
 use App\Http\Controllers\Admin\PlanController;
 use App\Http\Controllers\Admin\AuthController;
 use App\Http\Controllers\Admin\TicketController;
+use App\Http\Controllers\Admin\WalletController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/admin/login', [AuthController::class, 'showLogin'])
@@ -49,3 +50,9 @@ Route::post('/admin/tickets/{ticket}/reply', [TicketController::class, 'reply'])
 
 Route::patch('/admin/tickets/{ticket}/status', [TicketController::class, 'status'])
     ->name('admin.tickets.status');
+
+
+Route::middleware('auth')->group(function () {
+    Route::get('/admin/wallet', [WalletController::class, 'index'])
+        ->name('admin.wallet');
+});
