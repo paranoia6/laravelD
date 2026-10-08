@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AccountGeneratorController;
 use App\Http\Controllers\Admin\PlanController;
+use App\Http\Controllers\Admin\SupportController;
 use App\Http\Controllers\Admin\AuthController;
 use App\Http\Controllers\Admin\TicketController;
 use App\Http\Controllers\Admin\WalletController;
@@ -20,6 +21,11 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+Route::redirect('/demo', '/demo/dashboard');
+
+Route::view('/demo/dashboard', 'dashboard.index')->name('demo.dashboard');
+Route::view('/demo/users', 'users.index')->name('demo.users');
+
 Route::get('/accounts/generator', [AccountGeneratorController::class, 'create'])
     ->name('accounts.generator');
 
@@ -32,7 +38,12 @@ Route::get('/admin/plans', [PlanController::class, 'index'])
 Route::patch('/admin/plans/{plan}', [PlanController::class, 'update'])
     ->name('admin.plans.update');
 
-
+Route::get('/admin/supports', [SupportController::class, 'index'])->name('admin.supports');
+Route::post('/admin/supports', [SupportController::class, 'store'])->name('admin.supports.store');
+Route::get('/admin/supports/{support}', [SupportController::class, 'show'])->name('admin.supports.show');
+Route::patch('/admin/supports/{support}', [SupportController::class, 'update'])->name('admin.supports.update');
+Route::patch('/admin/supports/{support}/toggle', [SupportController::class, 'toggle'])->name('admin.supports.toggle');
+Route::delete('/admin/supports/{support}', [SupportController::class, 'destroy'])->name('admin.supports.destroy');
 Route::get('/admin/tickets', [TicketController::class, 'index'])
     ->name('admin.tickets');
 
