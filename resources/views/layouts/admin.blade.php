@@ -26,14 +26,9 @@
         <!-- Menu -->
         <nav class="flex flex-col items-center gap-2 py-6">
 
-            <a href="{{ route('demo.dashboard') }}"
+            <a href="{{ route('admin.dashboard') }}"
                class="group flex h-12 w-12 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600">
                 <span class="text-xl">⌂</span>
-            </a>
-
-            <a href="{{ route('demo.users') }}"
-               class="group flex h-12 w-12 items-center justify-center rounded-lg text-slate-400 hover:bg-indigo-50 hover:text-indigo-600">
-                <span class="text-xl">▦</span>
             </a>
 
             <a href="#"
