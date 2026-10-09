@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AccountGeneratorController;
+use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\PlanController;
 use App\Http\Controllers\Admin\SupportController;
 use App\Http\Controllers\Admin\AuthController;
@@ -21,9 +22,8 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('/admin/dashboard', function () {
-    return view('dashboard.index');
-})->middleware('auth')->name('admin.dashboard');
+Route::get('/admin', [DashboardController::class, 'index'])
+    ->name('admin.dashboard');
 
 Route::get('/accounts/generator', [AccountGeneratorController::class, 'create'])
     ->name('accounts.generator');
