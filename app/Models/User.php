@@ -39,6 +39,8 @@ class User extends Authenticatable
             'admin_blocked_at' => 'datetime',
             'deleted_at' => 'datetime',
             'password' => 'hashed',
+            'role' =>
+                \App\Enums\UserRole::class,
         ];
     }
     public function walletTransactions(): HasMany
