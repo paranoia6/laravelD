@@ -75,4 +75,9 @@ class Account extends Authenticatable
     {
         return $this->belongsTo(Support::class, 'supporter_id');
     }
+
+    public function plan(): BelongsTo
+    {
+        return $this->belongsTo(Plan::class);
+    }
 }
