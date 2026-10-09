@@ -21,10 +21,9 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::redirect('/demo', '/demo/dashboard');
-
-Route::view('/demo/dashboard', 'dashboard.index')->name('demo.dashboard');
-Route::view('/demo/users', 'users.index')->name('demo.users');
+Route::get('/admin/dashboard', function () {
+    return view('dashboard.index');
+})->middleware('auth')->name('admin.dashboard');
 
 Route::get('/accounts/generator', [AccountGeneratorController::class, 'create'])
     ->name('accounts.generator');
@@ -61,12 +60,6 @@ Route::post('/admin/tickets/{ticket}/reply', [TicketController::class, 'reply'])
 
 Route::patch('/admin/tickets/{ticket}/status', [TicketController::class, 'status'])
     ->name('admin.tickets.status');
-
-Route::redirect('/demo', '/demo/dashboard');
-
-Route::view('/demo/dashboard', 'dashboard.index')->name('demo.dashboard');
-
-Route::view('/demo/users', 'users.index')->name('demo.users');
 
 Route::middleware('auth')->group(function () {
     Route::get('/admin/wallet', [WalletController::class, 'index'])
