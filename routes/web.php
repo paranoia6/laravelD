@@ -105,3 +105,32 @@ Route::patch('/admin/accounts/{account}/block', [
 
 Route::get('/admin/reports', [ReportController::class, 'index'])
     ->name('admin.reports');
+
+
+Route::middleware('role:super_admin')->group(function () {
+    Route::post('/admin/software', [SoftwareController::class, 'store'])
+        ->name('admin.software.store');
+
+    Route::patch('/admin/software/{software}/toggle', [SoftwareController::class, 'toggle'])
+        ->name('admin.software.toggle');
+
+    Route::delete('/admin/software/{software}', [SoftwareController::class, 'destroy'])
+        ->name('admin.software.destroy');
+
+    Route::middleware('role:super_admin')->group(function () {
+        Route::get('/admin/admins', [AdminController::class, 'index'])
+            ->name('admin.admins');
+
+        Route::post('/admin/admins', [AdminController::class, 'store'])
+            ->name('admin.admins.store');
+
+
+        Route::post('/admin/admins/{user}/credit', [AdminController::class, 'credit'])
+            ->name('admin.admins.credit');
+    });
+    Route::patch(
+        '/admin/admins/{user}/credit',
+        [AdminController::class, 'adjustCredit']
+    )->name('admin.admins.credit.adjust');
+
+});
