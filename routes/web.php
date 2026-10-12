@@ -8,6 +8,8 @@ use App\Http\Controllers\Admin\SupportController;
 use App\Http\Controllers\Admin\AuthController;
 use App\Http\Controllers\Admin\TicketController;
 use App\Http\Controllers\Admin\WalletController;
+use App\Http\Controllers\Admin\SoftwareController;
+use App\Http\Controllers\Admin\AdminController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/admin/login', [AuthController::class, 'showLogin'])
@@ -137,6 +139,7 @@ Route::middleware('role:super_admin')->group(function () {
 
 Route::get('/admin/software', [SoftwareController::class, 'index'])
     ->name('admin.software');
+
 
 Route::middleware('role:super_admin')->group(function () {
     Route::post('/admin/software', [SoftwareController::class, 'store'])
