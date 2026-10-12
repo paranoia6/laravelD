@@ -135,6 +135,8 @@ Route::middleware('role:super_admin')->group(function () {
 
 });
 
+Route::get('/admin/software', [SoftwareController::class, 'index'])
+    ->name('admin.software');
 
 Route::middleware('role:super_admin')->group(function () {
     Route::post('/admin/software', [SoftwareController::class, 'store'])
