@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AccountGeneratorController;
+use App\Http\Controllers\Admin\AccountController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\PlanController;
 use App\Http\Controllers\Admin\SupportController;
