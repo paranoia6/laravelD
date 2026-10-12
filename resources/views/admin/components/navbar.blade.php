@@ -1,5 +1,4 @@
 @php
-dd(12);
     $currentUser = auth()->user();
 
     $unreadNotifications = $currentUser
@@ -7,7 +6,6 @@ dd(12);
         : 0;
 
     $balance = (int) ($currentUser->balance ?? 0);
-    dd($currentUser->role);
     $isSuperAdmin = $currentUser?->role?->value === 'super_admin';
 @endphp
 
