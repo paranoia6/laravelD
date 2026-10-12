@@ -102,3 +102,6 @@ Route::patch('/admin/accounts/{account}/block', [
     AccountController::class,
     'block'
 ])->name('admin.accounts.block');
+
+Route::get('/admin/reports', [ReportController::class, 'index'])
+    ->name('admin.reports');
