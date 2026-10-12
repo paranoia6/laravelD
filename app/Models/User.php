@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -53,6 +55,42 @@ class User extends Authenticatable
         return $this->hasMany(
             WalletTransaction::class,
             'created_by'
+        );
+    }
+
+    /**
+     * Support پیش‌فرض کاربر
+     */
+    public function support(): BelongsTo
+    {
+        return $this->belongsTo(
+            Support::class,
+            'supporter_id'
+        );
+    }
+
+
+    /**
+     * تمام Supportهایی که این کاربر ساخته
+     */
+    public function supports(): HasMany
+    {
+        return $this->hasMany(
+            Support::class,
+            'user_id'
+        );
+    }
+
+
+
+    /**
+     * اکانت‌هایی که این Admin ساخته
+     */
+    public function createdAccounts(): HasMany
+    {
+        return $this->hasMany(
+            Account::class,
+            'admin_id'
         );
     }
 
