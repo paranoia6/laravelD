@@ -65,3 +65,39 @@ Route::middleware('auth')->group(function () {
     Route::get('/admin/wallet', [WalletController::class, 'index'])
         ->name('admin.wallet');
 });
+
+// Accounts
+Route::get('/admin/accounts', [
+    AccountController::class,
+    'index'
+])->name('admin.accounts');
+
+Route::get('/admin/accounts/create', [
+    AccountController::class,
+    'create'
+])->name('admin.accounts.create');
+
+Route::post('/admin/accounts', [
+    AccountController::class,
+    'store'
+])->name('admin.accounts.store');
+
+Route::get('/admin/accounts/result', [
+    AccountController::class,
+    'result'
+])->name('admin.accounts.result');
+
+Route::get('/admin/accounts/{account}', [
+    AccountController::class,
+    'show'
+])->name('admin.accounts.show');
+
+Route::post('/admin/accounts/{account}/renew', [
+    AccountController::class,
+    'renew'
+])->name('admin.accounts.renew');
+
+Route::patch('/admin/accounts/{account}/block', [
+    AccountController::class,
+    'block'
+])->name('admin.accounts.block');
