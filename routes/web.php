@@ -168,3 +168,14 @@ Route::middleware('role:super_admin')->group(function () {
     )->name('admin.admins.credit.adjust');
 
 });
+
+Route::get('/admin/notifications', [
+    NotificationController::class,
+    'index'
+])->name('admin.notifications');
+
+Route::patch('/admin/notifications/{id}/read', [
+    NotificationController::class,
+    'read'
+])->name('admin.notifications.read');
+
