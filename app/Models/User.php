@@ -24,6 +24,7 @@ class User extends Authenticatable
         'is_active',
         'admin_blocked_at',
         'admin_block_reason',
+        'expired_type',
     ];
 
     protected $hidden = [
