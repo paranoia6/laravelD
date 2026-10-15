@@ -187,8 +187,8 @@
 
                         $canRefund =
                             ! $isBlocked
-                            && $hoursSinceFirstLogin !== null
-                            && $hoursSinceFirstLogin <= 72;
+                            && $account->first_login_date
+                            && $account->first_login_date->copy()->addHours(72)->greaterThanOrEqualTo(now());
 
                         $canRenew =
                             ! $isBlocked
@@ -260,9 +260,9 @@
 
                         <td>
 
-                            {{ $account->created_at
+                            {{ $account->first_login_date
                                 ? jalali_date(
-                                    $account->created_at,
+                                    $account->first_login_date,
                                     'Y/m/d H:i'
                                 )
                                 : '-'
@@ -339,7 +339,13 @@
                                 @endif
 
 
-                                @if(!$isBlocked)
+                                @if($isBlocked)
+
+                                    <span class="blocked-label">
+                                        مسدود شده
+                                    </span>
+
+                                @elseif($account->first_login_date)
 
                                     <form
                                         method="POST"
@@ -349,7 +355,8 @@
                                         ) }}"
                                         onsubmit="return confirmAccountBlock(
                                             this,
-                                            {{ $canRefund ? 'true' : 'false' }}
+                                            {{ $canRefund ? 'true' : 'false' }},
+                                            true
                                         )"
                                     >
 
@@ -375,7 +382,7 @@
                                 @else
 
                                     <span class="blocked-label">
-                                        مسدود شده
+                                        در انتظار اولین ورود
                                     </span>
 
                                 @endif
@@ -563,32 +570,37 @@
 
         function confirmAccountBlock(
             form,
-            under72Hours
+            under72Hours,
+            hasFirstLogin
         ) {
 
-            if (under72Hours) {
-
+            if (!hasFirstLogin) {
                 return confirm(
-                    'این اکانت زیر ۷۲ ساعت فعال شده است. '
+                    'اولین ورود موفق این اکانت هنوز ثبت نشده است. '
+                    + 'در صورت مسدودسازی، طبق قانون فعلی مبلغی برگشت داده نمی‌شود. '
+                    + 'آیا مطمئن هستید؟'
+                );
+            }
+
+            if (under72Hours) {
+                return confirm(
+                    'کمتر از ۷۲ ساعت از اولین ورود این اکانت گذشته است. '
                     + 'در صورت مسدودسازی مبلغ پرداخت‌شده '
                     + 'به موجودی Admin برگشت داده می‌شود. '
                     + 'آیا ادامه می‌دهید؟'
                 );
-
             }
 
             const confirmed = confirm(
-                'بیش از ۷۲ ساعت از فعال‌سازی این اکانت گذشته است. '
+                'بیش از ۷۲ ساعت از اولین ورود این اکانت گذشته است. '
                 + 'در صورت مسدودسازی هیچ مبلغی برگشت داده نمی‌شود. '
                 + 'آیا مطمئن هستید؟'
             );
 
             if (confirmed) {
-
-                const input =
-                    form.querySelector(
-                        'input[name="confirm_over_72_hours"]'
-                    );
+                const input = form.querySelector(
+                    'input[name="confirm_over_72_hours"]'
+                );
 
                 if (input) {
                     input.value = '1';

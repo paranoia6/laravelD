@@ -96,15 +96,6 @@ class AccountBlockService
                 );
             }
 
-            /*
-             * first_login_date الزامی است.
-             */
-            if (! $account->first_login_date) {
-                throw new RuntimeException(
-                    'اولین ورود موفق اکانت هنوز ثبت نشده است.'
-                );
-            }
-
             $now = now();
 
             /*
@@ -114,29 +105,26 @@ class AccountBlockService
                 && $actor->roleValue() === 'super_admin';
 
             /*
-             * اگر اولین ورود ثبت شده باشد، زمان واقعی را محاسبه می‌کنیم.
-             * Super Admin حتی قبل از اولین ورود هم می‌تواند Block کند.
+             * هیچ‌کس، حتی Super Admin، بدون ثبت اولین ورود
+             * اجازه مسدود کردن اکانت را ندارد.
+             */
+            if (! $account->first_login_date) {
+                throw new RuntimeException(
+                    'تا زمانی که اولین ورود موفق اکانت ثبت نشده باشد، امکان مسدودسازی وجود ندارد.'
+                );
+            }
+
+            /*
+             * اولین ورود ثبت شده است؛ زمان واقعی را محاسبه می‌کنیم.
+             * این شرط برای Admin و Super Admin یکسان است.
              */
             $hoursPassed = $account->first_login_date
                 ? $account->first_login_date->diffInHours($now)
                 : 0;
 
             $under72Hours = $account->first_login_date
-                ? $hoursPassed <= 72
+                ? $account->first_login_date->copy()->addHours(72)->greaterThanOrEqualTo($now)
                 : false;
-
-            /*
-             * Admin معمولی بعد از 72 ساعت نیاز به تأیید دارد.
-             * Super Admin بدون این محدودیت می‌تواند Block کند.
-             */
-            if (
-                ! $isSuperAdmin
-                && ! $account->first_login_date
-            ) {
-                throw new RuntimeException(
-                    'اولین ورود موفق اکانت هنوز ثبت نشده است.'
-                );
-            }
 
             if (
                 ! $isSuperAdmin
