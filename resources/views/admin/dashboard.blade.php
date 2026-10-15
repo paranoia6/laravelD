@@ -6,7 +6,10 @@
 
     @php
         $user = auth()->user();
-        $isSuperAdmin = $user?->role?->value === 'super_admin';
+        $isSuperAdmin = $user
+            && (($user->role instanceof \\BackedEnum
+                ? $user->role->value
+                : $user->role) === 'super_admin');
 
         $jalali = function ($date, $withTime = true) {
             if (!$date) {

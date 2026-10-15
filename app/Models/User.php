@@ -25,6 +25,7 @@ class User extends Authenticatable
         'is_active',
         'admin_blocked_at',
         'admin_block_reason',
+        'expired_type',
     ];
 
     protected $hidden = [
@@ -92,6 +93,21 @@ class User extends Authenticatable
             Account::class,
             'admin_id'
         );
+    }
+
+
+    /**
+     * Return the user's role as a string, whether role is an enum or a string.
+     */
+    public function roleValue(): ?string
+    {
+        $role = $this->role;
+
+        if ($role instanceof \BackedEnum) {
+            return (string) $role->value;
+        }
+
+        return is_string($role) ? $role : null;
     }
 
 }

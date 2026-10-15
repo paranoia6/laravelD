@@ -99,7 +99,7 @@
 
                 @php
                     $isMe = (int) $message->user_id === (int) auth()->id();
-                    $isSuperAdmin = $message->user?->role?->value === 'super_admin';
+                    $isSuperAdmin = $message->user?->roleValue() === 'super_admin';
                 @endphp
 
                 <article class="ticket-message {{ $isMe ? 'mine' : 'theirs' }}">
@@ -146,7 +146,7 @@
                     <div>
                         <strong>ارسال پیام</strong>
                         <span>
-                        @if(auth()->user()->role->value === 'admin')
+                        @if(auth()->user()->roleValue() === 'admin')
                                 پاسخ شما تیکت را در وضعیت «در انتظار پاسخ» نگه می‌دارد.
                             @else
                                 پاسخ شما برای Admin ارسال می‌شود.
@@ -186,7 +186,7 @@
 
         @endif
 
-        @if(auth()->user()->role->value === 'super_admin')
+        @if(auth()->user()->roleValue() === 'super_admin')
 
             <div class="ticket-status-card">
 

@@ -1,8 +1,8 @@
 @php
     $user = auth()->user();
 
-    $isSuperAdmin = $user && $user->role?->value === 'super_admin';
-    $isAdmin = $user && $user->role?->value === 'admin';
+    $isSuperAdmin = $user && (($user->role instanceof \BackedEnum ? $user->role->value : $user->role) === 'super_admin');
+    $isAdmin = $user && (($user->role instanceof \BackedEnum ? $user->role->value : $user->role) === 'admin');
 
     $menuItems = [
         [
@@ -136,7 +136,11 @@
 
         @foreach($menuItems as $item)
 
-            @if(! $user || ! in_array($user->role?->value, $item['roles'], true))
+            @if(! $user || ! in_array(($user->role instanceof \BackedEnum ? $user->role->value : $user->role), $item['roles'], true))
+                @continue
+            @endif
+
+            @if(! \Illuminate\Support\Facades\Route::has($item['route']))
                 @continue
             @endif
 
