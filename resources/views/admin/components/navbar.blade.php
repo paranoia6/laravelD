@@ -1,14 +1,10 @@
 @php
-dd(12);
     $currentUser = auth()->user();
 
-    $unreadNotifications = $currentUser
-        ? $currentUser->unreadNotifications()->count()
-        : 0;
+    $unreadNotifications = 0;
 
     $balance = (int) ($currentUser->balance ?? 0);
-    dd($currentUser->role);
-    $isSuperAdmin = $currentUser?->role?->value === 'super_admin';
+    $isSuperAdmin = ($currentUser && (($currentUser->role instanceof \BackedEnum ? $currentUser->role->value : $currentUser->role) === 'super_admin'));
 @endphp
 
 <header class="admin-navbar">
@@ -66,6 +62,7 @@ dd(12);
 
         @endif
 
+        @if(\Illuminate\Support\Facades\Route::has('admin.notifications'))
         <a
             href="{{ route('admin.notifications') }}"
             class="navbar-notification"
@@ -82,6 +79,7 @@ dd(12);
                 </span>
             @endif
         </a>
+        @endif
 
         <div class="navbar-user">
 

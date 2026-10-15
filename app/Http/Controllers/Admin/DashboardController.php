@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Account;
+use App\Models\Plan;
 use App\Models\User;
 use App\Models\WalletTransaction;
 use Illuminate\Http\Request;
@@ -23,7 +24,9 @@ class DashboardController extends Controller
 
         $accountQuery = Account::query();
 
-        if ($user->role->value === 'admin') {
+        if (($user->role instanceof \App\Enums\UserRole
+        ? ($user->role instanceof \App\Enums\UserRole ? $user->role->value : $user->role)
+        : $user->role) === 'admin') {
             $accountQuery->where('admin_id', $user->id);
         }
 
@@ -87,8 +90,10 @@ class DashboardController extends Controller
                 ->whereNotNull('first_login_date')
                 ->whereNotNull('blocked_at')
                 ->whereRaw(
-                    'blocked_at <= DATE_ADD(first_login_date, INTERVAL 72 HOUR)'
-                )
+                                \Illuminate\Support\Facades\DB::connection()->getDriverName() === 'sqlite'
+                                    ? "blocked_at <= datetime(first_login_date, '+72 hours')"
+                                    : 'blocked_at <= DATE_ADD(first_login_date, INTERVAL 72 HOUR)'
+                            )
                 ->count(),
 
             /*
@@ -102,8 +107,10 @@ class DashboardController extends Controller
                 ->whereNotNull('first_login_date')
                 ->whereNotNull('blocked_at')
                 ->whereRaw(
-                    'blocked_at > DATE_ADD(first_login_date, INTERVAL 72 HOUR)'
-                )
+                                \Illuminate\Support\Facades\DB::connection()->getDriverName() === 'sqlite'
+                                    ? "blocked_at > datetime(first_login_date, '+72 hours')"
+                                    : 'blocked_at > DATE_ADD(first_login_date, INTERVAL 72 HOUR)'
+                            )
                 ->count(),
         ];
 
@@ -118,7 +125,7 @@ class DashboardController extends Controller
         |
         */
 
-        if ($user->role->value === 'super_admin') {
+        if (($user->role instanceof \App\Enums\UserRole ? ($user->role instanceof \App\Enums\UserRole ? $user->role->value : $user->role) : $user->role) === 'super_admin') {
             $stats['totalSales'] = (int) WalletTransaction::query()
                 ->where('type', 'credit')
                 ->whereHas('user', function ($query) {
@@ -132,6 +139,11 @@ class DashboardController extends Controller
         | Recent Accounts
         |--------------------------------------------------------------------------
         */
+
+        $plans = Plan::query()
+            ->orderBy('type')
+            ->orderBy('duration_months')
+            ->get();
 
         $recentAccounts = (clone $accountQuery)
             ->with([
@@ -151,7 +163,7 @@ class DashboardController extends Controller
 
         $adminStats = collect();
 
-        if ($user->role->value === 'super_admin') {
+        if (($user->role instanceof \App\Enums\UserRole ? $user->role->value : $user->role) === 'super_admin') {
 
             $admins = User::query()
                 ->where('role', 'admin')
@@ -188,7 +200,9 @@ class DashboardController extends Controller
                             ->whereNotNull('first_login_date')
                             ->whereNotNull('blocked_at')
                             ->whereRaw(
-                                'blocked_at <= DATE_ADD(first_login_date, INTERVAL 72 HOUR)'
+                                \Illuminate\Support\Facades\DB::connection()->getDriverName() === 'sqlite'
+                                    ? "blocked_at <= datetime(first_login_date, '+72 hours')"
+                                    : 'blocked_at <= DATE_ADD(first_login_date, INTERVAL 72 HOUR)'
                             );
                     },
 
@@ -202,7 +216,9 @@ class DashboardController extends Controller
                             ->whereNotNull('first_login_date')
                             ->whereNotNull('blocked_at')
                             ->whereRaw(
-                                'blocked_at > DATE_ADD(first_login_date, INTERVAL 72 HOUR)'
+                                \Illuminate\Support\Facades\DB::connection()->getDriverName() === 'sqlite'
+                                    ? "blocked_at > datetime(first_login_date, '+72 hours')"
+                                    : 'blocked_at > DATE_ADD(first_login_date, INTERVAL 72 HOUR)'
                             );
                     },
 
@@ -267,6 +283,7 @@ class DashboardController extends Controller
         return view('admin.dashboard', [
             'stats' => $stats,
             'recentAccounts' => $recentAccounts,
+            'plans' => $plans,
             'adminStats' => $adminStats,
         ]);
     }

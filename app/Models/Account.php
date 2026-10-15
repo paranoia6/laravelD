@@ -66,6 +66,11 @@ class Account extends Authenticatable
         ];
     }
 
+    public function plan(): BelongsTo
+    {
+        return $this->belongsTo(Plan::class, 'plan_id');
+    }
+
     public function admin(): BelongsTo
     {
         return $this->belongsTo(User::class, 'admin_id');

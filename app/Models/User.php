@@ -5,6 +5,7 @@ namespace App\Models;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
@@ -52,6 +53,26 @@ class User extends Authenticatable
             WalletTransaction::class,
             'created_by'
         );
+    }
+
+public function createdAccounts()
+{
+    return $this->hasMany(\App\Models\Account::class, 'admin_id');
+}
+
+
+    /**
+     * Return the user's role as a string, whether role is an enum or a string.
+     */
+    public function roleValue(): ?string
+    {
+        $role = $this->role;
+
+        if ($role instanceof \BackedEnum) {
+            return (string) $role->value;
+        }
+
+        return is_string($role) ? $role : null;
     }
 
 }

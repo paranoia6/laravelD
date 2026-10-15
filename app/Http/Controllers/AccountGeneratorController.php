@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Account;
+use App\Models\Plan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 
@@ -15,20 +16,53 @@ class AccountGeneratorController extends Controller
 
     public function store(Request $request)
     {
+        $user = $request->user();
+
+        abort_unless($user, 401);
+
         $validated = $request->validate([
-            'supporter_id' => ['nullable', 'integer'],
-            'username_prefix' => ['required', 'string', 'max:200'],
-            'count' => ['required', 'integer', 'min:1', 'max:1000'],
-            'account_type' => ['required', 'in:1,2'],
+            'supporter_id' => [
+                'nullable',
+                'integer',
+                'exists:supports,id',
+            ],
+            'username_prefix' => [
+                'required',
+                'string',
+                'max:200',
+            ],
+            'count' => [
+                'required',
+                'integer',
+                'min:1',
+                'max:1000',
+            ],
+            'account_type' => [
+                'required',
+                'in:1,2',
+            ],
         ]);
+
+        $planId = Plan::query()
+            ->where('is_active', true)
+            ->orderBy('id')
+            ->value('id');
+
+        if ($planId === null) {
+            return back()
+                ->withErrors([
+                    'count' => 'برای ساخت اکانت ابتدا یک پلن فعال ثبت کنید.',
+                ])
+                ->withInput();
+        }
 
         $accounts = [];
         $password = Hash::make('61490');
 
         for ($i = 1; $i <= $validated['count']; $i++) {
             $accounts[] = [
-                'admin_id' => 1,
-                'plan_id' => 1,
+                'admin_id' => $user->id,
+                'plan_id' => $planId,
                 'device_type' => 1,
                 'supporter_id' => $validated['supporter_id'],
                 'username' => $validated['username_prefix'] . $i,
