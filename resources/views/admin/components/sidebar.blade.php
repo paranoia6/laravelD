@@ -159,7 +159,7 @@
             <li class="nav-item">
 
                 <a
-
+                    href="{{ route($item['route']) }}"
                     class="nav-link {{ request()->routeIs($item['route'] . '*') ? 'active' : '' }}"
                 >
 

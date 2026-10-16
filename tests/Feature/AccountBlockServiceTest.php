@@ -35,10 +35,10 @@ class AccountBlockServiceTest extends TestCase
     {
         $id = DB::table('users')->insertGetId([
             'email' => uniqid('test-', true).'@example.com',
+            'name' => 'Test User',
             'role' => $role,
             'balance' => $balance,
             'password' => bcrypt('password'),
-            'expired_type' => 1,
             'created_at' => now(),
             'updated_at' => now(),
         ]);

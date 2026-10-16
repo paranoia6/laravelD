@@ -7,7 +7,7 @@
     @php
         $user = auth()->user();
         $isSuperAdmin = $user
-            && (($user->role instanceof \\BackedEnum
+            && (($user->role instanceof \BackedEnum
                 ? $user->role->value
                 : $user->role) === 'super_admin');
 
