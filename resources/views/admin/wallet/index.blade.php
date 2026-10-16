@@ -7,7 +7,7 @@
         <h4>کیف پول</h4>
     </div>
 
-    @if(auth()->user()->role->value === 'admin')
+    @if((auth()->user()->role instanceof \BackedEnum ? auth()->user()->role->value : auth()->user()->role) === 'admin')
 
         <div class="card mb-4">
 
@@ -126,7 +126,7 @@
                         <thead>
                         <tr>
                             <th>تاریخ</th>
-                            @if(auth()->user()->role->value === 'super_admin')
+                            @if(auth()->user()->roleValue() === 'super_admin')
                                 <th>Admin</th>
                             @endif
                             <th>نوع</th>
@@ -147,7 +147,7 @@
                                     {{ jalali_date($transaction->created_at) }}
                                 </td>
 
-                                @if(auth()->user()->role->value === 'super_admin')
+                                @if(auth()->user()->roleValue() === 'super_admin')
                                     <td>
                                         {{ $transaction->user->email ?? '-' }}
                                     </td>

@@ -25,7 +25,7 @@ class TicketController extends Controller
             ->withCount('messages')
             ->latest('id');
 
-        if ($user->role->value === 'admin') {
+        if (($user->role instanceof \BackedEnum ? $user->role->value : $user->role) === 'admin') {
             $query->where('admin_id', $user->id);
         }
 
@@ -45,7 +45,7 @@ class TicketController extends Controller
     {
         $user = $request->user();
 
-        if ($user->role->value !== 'admin') {
+        if ($user->roleValue() !== 'admin') {
             abort(403);
         }
 
@@ -147,7 +147,7 @@ class TicketController extends Controller
             'message' => $validated['message'],
         ]);
 
-        if ($user->role->value === 'admin') {
+        if (($user->role instanceof \BackedEnum ? $user->role->value : $user->role) === 'admin') {
             $ticket->update([
                 'status' => Ticket::STATUS_PENDING,
             ]);
@@ -181,7 +181,7 @@ class TicketController extends Controller
 
         return back()->with(
             'success',
-            $user->role->value === 'admin'
+            ($user->role instanceof \BackedEnum ? $user->role->value : $user->role) === 'admin'
                 ? 'پیام ثبت شد و تیکت در انتظار پاسخ Super Admin است.'
                 : 'پاسخ Super Admin ثبت شد.'
         );
@@ -193,7 +193,7 @@ class TicketController extends Controller
     ): RedirectResponse {
         $user = $request->user();
 
-        if ($user->role->value !== 'super_admin') {
+        if ($user->roleValue() !== 'super_admin') {
             abort(403);
         }
 
@@ -233,7 +233,7 @@ class TicketController extends Controller
         $user = $request->user();
 
         if (
-            $user->role->value === 'admin'
+            ($user->role instanceof \BackedEnum ? $user->role->value : $user->role) === 'admin'
             && (int) $ticket->admin_id !== (int) $user->id
         ) {
             abort(403);

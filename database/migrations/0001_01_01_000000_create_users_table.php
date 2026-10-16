@@ -12,22 +12,16 @@ return new class extends Migration
             $table->id();
 
             $table->string('email');
+            $table->string('name');
 
             $table->string('role')->default('admin');
             $table->unsignedBigInteger('balance')->default(0);
 
-            $table->boolean('is_test')->default(false);
 
             $table->timestamp('email_verified_at')->nullable();
 
             $table->string('pass')->nullable();
             $table->string('password');
-
-            $table->unsignedInteger('device_type')->default(1);
-            $table->integer('expired_type');
-
-            $table->dateTime('expired_at')->nullable();
-            $table->dateTime('first_login_date')->nullable();
 
             $table->boolean('is_active')->default(true);
 
@@ -36,26 +30,6 @@ return new class extends Migration
 
             $table->dateTime('suspend_at')->nullable();
 
-            $table->integer('account_type')->default(1);
-
-            $table->unsignedBigInteger('supporter_id')->nullable();
-
-            $table->string('device_model')->nullable();
-            $table->string('android_id')->nullable();
-
-            $table->string('os_version', 10)->nullable();
-
-            $table->boolean('is_other_device_allow')->default(false);
-
-            $table->integer('try_login')->default(0);
-
-            $table->dateTime('last_seen')->nullable();
-
-            $table->string('manufacturer')->nullable();
-
-            $table->string('app_version_code', 50)->nullable();
-
-            $table->integer('seller_id')->default(1);
 
             $table->rememberToken();
 

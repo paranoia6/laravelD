@@ -38,3 +38,18 @@ function remainingDays(string $date): string
 
     return '+'.floor($days);
 }
+
+if (! function_exists('jalali_date')) {
+    function jalali_date($date, string $format = 'Y/m/d'): string
+    {
+        if ($date === null || $date === '') {
+            return '';
+        }
+
+        try {
+            return \Morilog\Jalali\Jalalian::fromDateTime($date)->format($format);
+        } catch (\Throwable $e) {
+            return '';
+        }
+    }
+}

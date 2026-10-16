@@ -13,7 +13,7 @@
                 <p>مدیریت درخواست‌ها و پیام‌های پشتیبانی</p>
             </div>
 
-            @if(auth()->user()->role->value === 'admin')
+            @if((auth()->user()->role instanceof \BackedEnum ? auth()->user()->role->value : auth()->user()->role) === 'admin')
                 <a href="{{ route('admin.tickets.create') }}" class="ticket-primary-btn">
                     <span class="ticket-btn-icon">+</span>
                     ایجاد تیکت جدید
@@ -51,7 +51,7 @@
                                     #{{ $ticket->id }}
                                 </div>
 
-                                @if(auth()->user()->role->value === 'super_admin')
+                                @if(auth()->user()->roleValue() === 'super_admin')
                                     <div class="ticket-admin">
                                         {{ $ticket->admin->email ?? '-' }}
                                     </div>
@@ -129,7 +129,7 @@
                 <div class="ticket-empty-icon">ت</div>
                 <strong>هنوز تیکتی ثبت نشده است.</strong>
 
-                @if(auth()->user()->role->value === 'admin')
+                @if((auth()->user()->role instanceof \BackedEnum ? auth()->user()->role->value : auth()->user()->role) === 'admin')
                     <a href="{{ route('admin.tickets.create') }}" class="ticket-primary-btn">
                         ایجاد اولین تیکت
                     </a>
