@@ -83,8 +83,6 @@ class AdminController extends Controller
             'balance' => 0,
 
             'is_active' => true,
-
-            'expired_type' => 1,
         ]);
 
 
