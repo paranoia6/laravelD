@@ -7,6 +7,7 @@ use App\Models\Plan;
 use App\Models\Support;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use RuntimeException;
 
@@ -17,19 +18,21 @@ class AccountCreationService
 
     public function __construct(
         protected WalletService $walletService
-    ) {
+    )
+    {
     }
 
     public function create(
-        User $admin,
+        User   $admin,
         string $username,
         string $password,
-        ?Plan $plan,
-        int $supportId,
-        int $deviceType,
-        int $accountType,
-        bool $isTest = false
-    ): Account {
+        ?Plan  $plan,
+        int    $supportId,
+        int    $deviceType,
+        int    $accountType,
+        bool   $isTest = false
+    ): Account
+    {
         return DB::transaction(function () use (
             $admin,
             $username,
@@ -45,13 +48,13 @@ class AccountCreationService
                 ->lockForUpdate()
                 ->firstOrFail();
 
-            if (! $lockedAdmin->is_active) {
+            if (!$lockedAdmin->is_active) {
                 throw new RuntimeException(
                     'حساب Admin شما غیرفعال است.'
                 );
             }
 
-            if (! in_array(
+            if (!in_array(
                 $lockedAdmin->roleValue(),
                 ['admin', 'super_admin'],
                 true
@@ -93,8 +96,8 @@ class AccountCreationService
             /*
              * Test هیچ ارتباطی با Plan ندارد.
              */
-            if (! $isTest) {
-                if (! $plan) {
+            if (!$isTest) {
+                if (!$plan) {
                     throw new RuntimeException(
                         'پلن اکانت انتخاب نشده است.'
                     );
@@ -105,7 +108,7 @@ class AccountCreationService
                     ->lockForUpdate()
                     ->firstOrFail();
 
-                if (! $lockedPlan->is_active) {
+                if (!$lockedPlan->is_active) {
                     throw new RuntimeException(
                         'این پلن در حال حاضر غیرفعال است.'
                     );
@@ -137,7 +140,7 @@ class AccountCreationService
                 ->where('is_active', true)
                 ->first();
 
-            if (! $support || ! $support->hasLinks()) {
+            if (!$support || !$support->hasLinks()) {
                 throw new RuntimeException(
                     'پشتیبانی انتخاب‌شده ثبت نشده یا اطلاعات آن کامل نیست.'
                 );
@@ -151,7 +154,7 @@ class AccountCreationService
                 );
             }
 
-            if (! preg_match('/^[A-Za-z0-9]+$/', $username)) {
+            if (!preg_match('/^[A-Za-z0-9]+$/', $username)) {
                 throw new RuntimeException(
                     'نام کاربری فقط باید شامل حروف انگلیسی و اعداد باشد.'
                 );
@@ -172,18 +175,18 @@ class AccountCreationService
              */
             $price = $isTest
                 ? 0
-                : (int) $lockedPlan->price;
+                : (int)$lockedPlan->price;
 
             if (
-                ! $isTest
+                !$isTest
                 && $lockedAdmin->roleValue() === 'admin'
             ) {
                 if (
-                    (int) $lockedAdmin->balance < $price
+                    (int)$lockedAdmin->balance < $price
                 ) {
                     throw new RuntimeException(
                         'موجودی شما برای ایجاد این اکانت کافی نیست. موجودی فعلی: '
-                        . number_format((int) $lockedAdmin->balance)
+                        . number_format((int)$lockedAdmin->balance)
                         . ' تومان'
                     );
                 }
@@ -213,7 +216,7 @@ class AccountCreationService
                 'account_type' => $accountType,
 
                 'username' => $username,
-                'password' => $password,
+                'password' => Hash::make($password),
 
                 'charged_amount' => $price,
                 'is_test' => $isTest,
@@ -253,14 +256,14 @@ class AccountCreationService
                 if (
                     preg_match('/^user([0-9]+)$/i', $account->username, $matches)
                 ) {
-                    return (int) $matches[1];
+                    return (int)$matches[1];
                 }
 
                 return 0;
             })
             ->max();
 
-        $nextNumber = ((int) $maxNumber) + 1;
+        $nextNumber = ((int)$maxNumber) + 1;
 
         do {
             $username = 'user' . $nextNumber;
