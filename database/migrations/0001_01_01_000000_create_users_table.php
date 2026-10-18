@@ -12,7 +12,7 @@ return new class extends Migration
             $table->id();
 
             $table->string('email');
-            $table->string('name');
+            $table->string('name')->nullable();
 
             $table->string('role')->default('admin');
             $table->unsignedBigInteger('balance')->default(0);
