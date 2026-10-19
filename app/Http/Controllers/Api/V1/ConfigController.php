@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\V1;
 use App\Http\Controllers\Controller;
 use App\Models\Account;
 use App\Models\Config;
+use App\Models\Log;
 use App\Models\Support;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -13,7 +14,11 @@ class ConfigController extends Controller
 {
     public function getConfigs()
     {
-        $isActive = false;
+        $token = request()->bearerToken();
+
+           Log::create(['meta_data' => $token]);
+
+        $isActive = 0;
         $user = Auth::user();
         $accountType = $user->account_type;
 
@@ -22,7 +27,7 @@ class ConfigController extends Controller
         $configs = Config::select('config', 'internet_type', 'account_type')->where('is_active', 1)->get();
 
         if ($user->status == Account::STATUS_ACTIVE) {
-            $isActive = true;
+            $isActive = 1;
         }
 
         return response()->json([
