@@ -178,7 +178,7 @@ class AccountController extends Controller
 
         $support = Support::query()
             ->whereKey(
-                $validated['support_id']
+                $validated['supporter_id']
             )
             ->where(
                 'user_id',
@@ -190,7 +190,7 @@ class AccountController extends Controller
         if (! $support || ! $support->hasLinks()) {
             return back()
                 ->withErrors([
-                    'support_id' =>
+                    'supporter_id' =>
                         'پشتیبانی انتخاب‌شده متعلق به حساب شما نیست، غیرفعال است یا اطلاعاتی برای آن ثبت نشده است.',
                 ])
                 ->withInput();
@@ -287,7 +287,7 @@ class AccountController extends Controller
                             (int) ($account->plan?->duration_months ?? 0),
                         'plan_price' =>
                             (int) $account->charged_amount,
-                        'support_id' =>
+                        'supporter_id' =>
                             (int) $account->supporter_id,
                         'support' =>
                             $account->support?->name ?? '---',

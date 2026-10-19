@@ -411,13 +411,13 @@
                                             مسدود
                                         </span>
 
-                                        @elseif($account->first_login_at && $account->expired_at && $account->expired_at->isPast())
+                                        @elseif($account->first_login_date && $account->expired_at && $account->expired_at->isPast())
 
                                             <span class="dashboard-status expired">
                                             منقضی
                                         </span>
 
-                                        @elseif($account->first_login_at)
+                                        @elseif($account->first_login_date)
 
                                             <span class="dashboard-status active">
                                             فعال
@@ -435,7 +435,7 @@
 
 
                                     <td>
-                                        {{ $jalali($account->first_login_at) }}
+                                        {{ $jalali($account->first_login_date) }}
                                     </td>
 
 

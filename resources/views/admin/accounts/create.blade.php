@@ -251,7 +251,7 @@
                     <h3>پشتیبانی</h3>
 
                     <select
-                        name="support_id"
+                        name="supporter_id"
                         class="form-control"
                         required
                     >
@@ -260,7 +260,7 @@
                         @forelse($supports as $support)
                             <option
                                 value="{{ $support->id }}"
-                                {{ old('support_id') == $support->id ? 'selected' : '' }}
+                                {{ old('supporter_id') == $support->id ? 'selected' : '' }}
                             >
                                 {{ $support->name }}
                             </option>
@@ -445,7 +445,7 @@
             order: 4;
         }
 
-        .account-grid > .form-card:has(select[name="support_id"]) {
+        .account-grid > .form-card:has(select[name="supporter_id"]) {
             order: 5;
         }
 

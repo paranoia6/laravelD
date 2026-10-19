@@ -53,7 +53,7 @@ class StoreAccountRequest extends FormRequest
                 'exists:plans,id',
             ],
 
-            'support_id' => [
+            'supporter_id' => [
                 'required',
                 'integer',
 
@@ -113,10 +113,10 @@ class StoreAccountRequest extends FormRequest
             'plan_id.exists' =>
                 'پلن انتخاب‌شده وجود ندارد.',
 
-            'support_id.required' =>
+            'supporter_id.required' =>
                 'پشتیبانی را انتخاب کنید.',
 
-            'support_id.exists' =>
+            'supporter_id.exists' =>
                 'این پشتیبانی ثبت نشده، غیرفعال است یا متعلق به حساب شما نیست.',
 
             'username_mode.required' =>
@@ -208,7 +208,7 @@ class StoreAccountRequest extends FormRequest
         $support = Support::query()
             ->where(
                 'id',
-                $this->integer('support_id')
+                $this->integer('supporter_id')
             )
             ->where(
                 'user_id',
@@ -226,7 +226,7 @@ class StoreAccountRequest extends FormRequest
                     ->back()
                     ->withInput()
                     ->withErrors([
-                        'support_id' =>
+                        'supporter_id' =>
                             'برای پشتیبانی انتخاب‌شده هنوز اطلاعاتی ثبت نشده است.',
                     ])
             );
