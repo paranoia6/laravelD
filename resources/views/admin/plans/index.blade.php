@@ -30,8 +30,7 @@
                 </ul>
             </div>
         @endif
-
-        <div class="row g-4">
+<div class="row g-4">
 
             @foreach($plans as $plan)
 

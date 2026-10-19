@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Account;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 class ReportController extends Controller
@@ -16,7 +17,7 @@ class ReportController extends Controller
 
         $accountQuery = Account::query();
 
-        if ($user->role->value === 'admin') {
+        if ($user->roleValue() === 'admin') {
             $accountQuery->where('admin_id', $user->id);
         }
 
@@ -25,6 +26,14 @@ class ReportController extends Controller
 
         $monthStart = now()->startOfMonth();
         $monthEnd = now()->copy()->addMonth()->startOfMonth();
+
+        $within72HoursSql = DB::connection()->getDriverName() === 'sqlite'
+            ? "datetime(blocked_at) <= datetime(first_login_date, '+72 hours')"
+            : 'blocked_at <= DATE_ADD(first_login_date, INTERVAL 72 HOUR)';
+
+        $after72HoursSql = DB::connection()->getDriverName() === 'sqlite'
+            ? "datetime(blocked_at) > datetime(first_login_date, '+72 hours')"
+            : 'blocked_at > DATE_ADD(first_login_date, INTERVAL 72 HOUR)';
 
         $stats = [
             'total' => (clone $accountQuery)->count(),
@@ -70,18 +79,14 @@ class ReportController extends Controller
                 ->where('status', Account::STATUS_BLOCKED)
                 ->whereNotNull('first_login_date')
                 ->whereNotNull('blocked_at')
-                ->whereRaw(
-                    'blocked_at <= DATE_ADD(first_login_date, INTERVAL 72 HOUR)'
-                )
+                ->whereRaw($within72HoursSql)
                 ->count(),
 
             'blocked_over_72' => (clone $accountQuery)
                 ->where('status', Account::STATUS_BLOCKED)
                 ->whereNotNull('first_login_date')
                 ->whereNotNull('blocked_at')
-                ->whereRaw(
-                    'blocked_at > DATE_ADD(first_login_date, INTERVAL 72 HOUR)'
-                )
+                ->whereRaw($after72HoursSql)
                 ->count(),
         ];
 
@@ -93,7 +98,7 @@ class ReportController extends Controller
 
         $admins = collect();
 
-        if ($user->role->value === 'super_admin') {
+        if ($user->roleValue() === 'super_admin') {
 
             $admins = User::query()
                 ->where('role', 'admin')

@@ -37,7 +37,7 @@ class AccountController extends Controller
             ])
             ->latest('id');
 
-        if ($user->role->value === 'admin') {
+        if ($user->roleValue() === 'admin') {
             $query->where(
                 'admin_id',
                 $user->id
@@ -109,11 +109,7 @@ class AccountController extends Controller
                 'user_id',
                 $user->id
             )
-            ->where(function ($query) {
-                $query
-                    ->where('is_active', true)
-                    ->orWhereNull('is_active');
-            })
+            ->where('is_active', true)
             ->orderBy('id')
             ->get();
 
@@ -126,7 +122,7 @@ class AccountController extends Controller
                     $user->balance ?? 0
                 ),
                 'isSuperAdmin' =>
-                    $user->role->value === 'super_admin',
+                    $user->roleValue() === 'super_admin',
             ]
         );
     }
@@ -144,52 +140,27 @@ class AccountController extends Controller
         );
 
         /*
-         * برای Test، Request خودش plan_id را به
-         * پلن عادی ۱ ماهه تبدیل کرده است.
+         * اکانت تست به پلن نیاز ندارد.
+         * برای اکانت عادی، پلن باید فعال و دارای قیمت باشد.
          */
-        $plan = Plan::query()
-            ->where('is_active', true)
-            ->when(
-                $isTest,
-                function ($query) {
-                    $query
-                        ->where('type', 'normal')
-                        ->where('duration_months', 1);
-                }
-            )
-            ->whereNotNull('id')
-            ->when(
-                ! $isTest,
-                function ($query) use ($validated) {
-                    $query
-                        ->whereKey(
-                            $validated['plan_id']
-                        )
-                        ->whereNotNull('price');
-                }
-            )
-            ->when(
-                $isTest,
-                function ($query) use ($validated) {
-                    $query->whereKey(
-                        $validated['plan_id']
-                    );
-                }
-            )
-            ->first();
-
-        if (! $plan) {
-            return back()
-                ->withErrors([
-                    'plan_id' =>
-                        $isTest
-                            ? 'پلن عادی ۱ ماهه برای ساخت اکانت تست وجود ندارد.'
-                            : 'پلن انتخاب‌شده معتبر یا فعال نیست.',
-                ])
-                ->withInput();
-        }
+        $plan = null;
 
         if (! $isTest) {
+            $plan = Plan::query()
+                ->where('is_active', true)
+                ->whereKey($validated['plan_id'])
+                ->whereNotNull('price')
+                ->first();
+
+            if (! $plan) {
+                return back()
+                    ->withErrors([
+                        'plan_id' =>
+                            'پلن انتخاب‌شده معتبر یا فعال نیست.',
+                    ])
+                    ->withInput();
+            }
+
             $expectedType =
                 (int) $validated['account_type'] === 2
                     ? 'special'
@@ -213,11 +184,7 @@ class AccountController extends Controller
                 'user_id',
                 $user->id
             )
-            ->where(function ($query) {
-                $query
-                    ->where('is_active', true)
-                    ->orWhereNull('is_active');
-            })
+            ->where('is_active', true)
             ->first();
 
         if (! $support || ! $support->hasLinks()) {
@@ -242,7 +209,7 @@ class AccountController extends Controller
 
         if (
             ! $isTest
-            && $user->role->value === 'admin'
+            && $user->roleValue() === 'admin'
             && (int) $user->balance < $totalPrice
         ) {
             return back()
@@ -271,25 +238,6 @@ class AccountController extends Controller
                 $quantity,
                 $isTest
             ) {
-                if ($isTest && $user->role->value === 'admin') {
-                    $lockedAdmin = $user->newQuery()
-                        ->whereKey($user->id)
-                        ->lockForUpdate()
-                        ->firstOrFail();
-
-                    $existingTestCount = Account::query()
-                        ->where('admin_id', $lockedAdmin->id)
-                        ->where('is_test', true)
-                        ->count();
-
-                    if ($existingTestCount + $quantity > 5) {
-                        throw new RuntimeException(
-                            'هر Admin فقط ۵ اکانت تست می‌تواند بسازد. سهمیه باقی‌مانده: '
-                            . max(0, 5 - $existingTestCount)
-                        );
-                    }
-                }
-
                 $mode = $validated['username_mode'] ?? 'random';
                 $prefix = trim(
                     (string) ($validated['username_prefix'] ?? '')
@@ -336,11 +284,11 @@ class AccountController extends Controller
                         'password' => $password,
                         'plan_id' => $account->plan_id,
                         'duration_months' =>
-                            (int) $account->plan->duration_months,
+                            (int) ($account->plan?->duration_months ?? 0),
                         'plan_price' =>
                             (int) $account->charged_amount,
                         'support_id' =>
-                            (int) $account->support_id,
+                            (int) $account->supporter_id,
                         'support' =>
                             $account->support?->name ?? '---',
                         'device_type' =>
@@ -414,7 +362,7 @@ class AccountController extends Controller
         $user = $request->user();
 
         if (
-            $user->role->value === 'admin'
+            $user->roleValue() === 'admin'
             && (int) $account->admin_id
             !== (int) $user->id
         ) {
@@ -459,7 +407,7 @@ class AccountController extends Controller
         $user = $request->user();
 
         if (
-            $user->role->value === 'admin'
+            $user->roleValue() === 'admin'
             && (int) $account->admin_id
             !== (int) $user->id
         ) {
@@ -547,7 +495,7 @@ class AccountController extends Controller
         $user = $request->user();
 
         if (
-            $user->role->value === 'admin'
+            $user->roleValue() === 'admin'
             && (int) $account->admin_id
             !== (int) $user->id
         ) {

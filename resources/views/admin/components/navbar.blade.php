@@ -6,7 +6,7 @@
         : 0;
 
     $balance = (int) ($currentUser->balance ?? 0);
-    $isSuperAdmin = $currentUser?->role?->value === 'super_admin';
+    $isSuperAdmin = ($currentUser && (($currentUser->role instanceof \BackedEnum ? $currentUser->role->value : $currentUser->role) === 'super_admin'));
 @endphp
 
 <header class="admin-navbar">
@@ -64,6 +64,7 @@
 
         @endif
 
+        @if(\Illuminate\Support\Facades\Route::has('admin.notifications'))
         <a
             href="{{ route('admin.notifications') }}"
             class="navbar-notification"
@@ -80,6 +81,7 @@
                 </span>
             @endif
         </a>
+        @endif
 
         <div class="navbar-user">
 

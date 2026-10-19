@@ -94,4 +94,19 @@ class User extends Authenticatable
         );
     }
 
+
+    /**
+     * Return the user's role as a string, whether role is an enum or a string.
+     */
+    public function roleValue(): ?string
+    {
+        $role = $this->role;
+
+        if ($role instanceof \BackedEnum) {
+            return (string) $role->value;
+        }
+
+        return is_string($role) ? $role : null;
+    }
+
 }

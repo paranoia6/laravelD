@@ -31,7 +31,7 @@ class WalletService
                 ->lockForUpdate()
                 ->firstOrFail();
 
-            if ($target->role !== 'admin') {
+            if ($target->roleValue() !== 'admin') {
                 throw new RuntimeException(
                     'فقط کیف پول Admin قابل شارژ است.'
                 );
@@ -80,7 +80,7 @@ class WalletService
                 ->lockForUpdate()
                 ->firstOrFail();
 
-            if ($target->role !== 'admin') {
+            if ($target->roleValue() !== 'admin') {
                 throw new RuntimeException(
                     'فقط کیف پول Admin قابل کسر است.'
                 );
@@ -137,7 +137,7 @@ class WalletService
                 ->lockForUpdate()
                 ->firstOrFail();
 
-            if ($target->role !== 'admin') {
+            if ($target->roleValue() !== 'admin') {
                 throw new RuntimeException(
                     'فقط کیف پول Admin قابل بازگشت است.'
                 );
@@ -188,7 +188,7 @@ class WalletService
                 ->lockForUpdate()
                 ->firstOrFail();
 
-            if ($target->role !== 'admin') {
+            if ($target->roleValue() !== 'admin') {
                 throw new RuntimeException(
                     'فقط موجودی Admin قابل اصلاح است.'
                 );

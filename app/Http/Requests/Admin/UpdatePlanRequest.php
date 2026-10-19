@@ -9,7 +9,7 @@ class UpdatePlanRequest extends FormRequest
     public function authorize(): bool
     {
         return auth()->check()
-            && auth()->user()->role->value === 'super_admin';
+            && auth()->user()->roleValue() === 'super_admin';
     }
 
     public function rules(): array
