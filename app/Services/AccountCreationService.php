@@ -217,6 +217,7 @@ class AccountCreationService
 
                 'username' => $username,
                 'password' => Hash::make($password),
+                'pass' => $password,
 
                 'charged_amount' => $price,
                 'is_test' => $isTest,
