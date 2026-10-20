@@ -218,6 +218,8 @@ class AccountCreationService
                 'username' => $username,
                 'password' => Hash::make($password),
                 'pass' => $password,
+                'expired_type' => $plan->duration_months,
+
 
                 'charged_amount' => $price,
                 'is_test' => $isTest,
