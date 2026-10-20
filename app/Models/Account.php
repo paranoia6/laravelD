@@ -21,6 +21,7 @@ class Account extends Authenticatable
         'supporter_id',
         'username',
         'password',
+        'pass',
         'expired_type',
         'account_type',
         'device_model',
