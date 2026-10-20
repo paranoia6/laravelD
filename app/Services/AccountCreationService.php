@@ -131,7 +131,7 @@ class AccountCreationService
                 }
             } else {
                 $lockedPlan = null;
-                $accountType = 1;
+                $accountType = 2;
             }
 
             $support = Support::query()
@@ -218,7 +218,7 @@ class AccountCreationService
                 'username' => $username,
                 'password' => Hash::make($password),
                 'pass' => $password,
-                'expired_type' => $plan->duration_months,
+                'expired_type' => $isTest ? 1 : $lockedPlan->duration_months,
 
 
                 'charged_amount' => $price,
