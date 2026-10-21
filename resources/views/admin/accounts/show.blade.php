@@ -282,6 +282,7 @@
                             </div>
 
 
+                            @if($account->expired_at)
                             <div class="col-md-6">
 
                                 <label class="form-label">
@@ -302,6 +303,7 @@
 
                             </div>
 
+                            @endif
 
                             @if(
                                 $account->status
@@ -714,8 +716,6 @@
                                             'username' =>
                                                 $account->username,
 
-                                            'account_id' =>
-                                                $account->id,
                                         ],
                                         JSON_UNESCAPED_UNICODE
                                         | JSON_UNESCAPED_SLASHES
@@ -837,16 +837,18 @@
 
             function copyAccountInfo() {
 
-            const text =
-            'Username: {{ $account->username }}\n' +
-            'Password: {{ $account->password }}\n' +
-            'نوع اکانت: {{ $account->plan?->type === 'special' ? 'ویژه' : 'عادی' }}\n' +
-            'دستگاه: {{ (int) $account->device_type === 1 ? 'اندروید' : ((int) $account->device_type === 2 ? 'آیفون' : '---') }}\n' +
-            'مدت: {{ $account->plan?->duration_months ?? '---' }} ماه\n' +
-            'پشتیبانی: {{ $account->support?->name ?? '---' }}\n' +
-            'تاریخ ایجاد اکانت: {{ $account->created_at ? jalali_date($account->created_at, 'Y/m/d H:i:s') : '---' }}\n' +
-            'انقضا: {{ $account->expired_at ? jalali_date($account->expired_at, 'Y/m/d H:i:s') : '---' }}';
-
+                const text =
+                    'Username: {{ $account->username }}\n' +
+                    'Password: {{ $account->password }}\n' +
+                    'نوع اکانت: {{ $account->plan?->type === 'special' ? 'ویژه' : 'عادی' }}\n' +
+                    'دستگاه: {{ (int) $account->device_type === 1 ? 'اندروید' : ((int) $account->device_type === 2 ? 'آیفون' : '---') }}\n' +
+                    'مدت: {{ $account->plan?->duration_months ?? '---' }} ماه\n' +
+                    'پشتیبانی: {{ $account->support?->name ?? '---' }}\n' +
+                    'تاریخ ایجاد اکانت: {{ $account->created_at ? jalali_date($account->created_at, 'Y/m/d H:i:s') : '---' }}' +
+                    @if($account->expired_at)
+                        '\nانقضا: {{ jalali_date($account->expired_at, 'Y/m/d H:i:s') }}' +
+                    @endif
+                        '';
             navigator.clipboard.writeText(text)
             .then(function () {
             alert('اطلاعات اکانت کپی شد.');

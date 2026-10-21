@@ -110,7 +110,6 @@
                                                 [
                                                     'username' => $account['username'],
                                                     'password' => $account['password'],
-                                                    'account_id' => $account['id'],
                                                 ],
                                                 JSON_UNESCAPED_UNICODE
                                                 | JSON_UNESCAPED_SLASHES

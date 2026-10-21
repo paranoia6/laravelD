@@ -7,6 +7,7 @@ use App\Models\AuditLog;
 use App\Models\User;
 use App\Notifications\AccountBlockedNotification;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use RuntimeException;
 
 class AccountBlockService
@@ -169,7 +170,8 @@ class AccountBlockService
             /*
              * Audit Log
              */
-            AuditLog::create([
+            if (Schema::hasTable('audit_logs')) {
+                AuditLog::create([
                 'user_id' => $actor?->id,
 
                 'action' => 'account_blocked',
@@ -203,7 +205,8 @@ class AccountBlockService
 
                     'block_reason' => $account->block_reason,
                 ],
-            ]);
+                ]);
+            }
 
             /*
              * Notification نباید باعث Fail شدن Block شود.

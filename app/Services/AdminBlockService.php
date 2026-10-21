@@ -6,6 +6,7 @@ use App\Models\Account;
 use App\Models\AuditLog;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use RuntimeException;
 
 class AdminBlockService
@@ -162,18 +163,20 @@ class AdminBlockService
                 'admin_block_reason' => null,
             ]);
 
-            AuditLog::create([
-                'user_id' => $superAdmin->id,
-                'action' => 'admin_unblocked',
-                'subject_type' => User::class,
-                'subject_id' => $admin->id,
-                'description' => 'مسدودی Admin برداشته شد.',
-                'metadata' => [
-                    'admin_id' => $admin->id,
-                    'admin_email' => $admin->email,
-                    'accounts_reactivated' => $accountsReactivated,
-                ],
-            ]);
+            if (Schema::hasTable('audit_logs')) {
+                AuditLog::create([
+                    'user_id' => $superAdmin->id,
+                    'action' => 'admin_unblocked',
+                    'subject_type' => User::class,
+                    'subject_id' => $admin->id,
+                    'description' => 'مسدودی Admin برداشته شد.',
+                    'metadata' => [
+                        'admin_id' => $admin->id,
+                        'admin_email' => $admin->email,
+                        'accounts_reactivated' => $accountsReactivated,
+                    ],
+                ]);
+            }
 
             return [
                 'accounts_reactivated' => $accountsReactivated,

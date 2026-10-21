@@ -6,6 +6,7 @@ use App\Models\Account;
 use App\Models\Plan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
 class AccountGeneratorController extends Controller
 {
@@ -59,13 +60,24 @@ class AccountGeneratorController extends Controller
         $accounts = [];
         $password = Hash::make('61490');
 
+        $usedUsernames = [];
+
         for ($i = 1; $i <= $validated['count']; $i++) {
+            do {
+                $username = $validated['username_prefix'] . Str::lower(Str::random(8));
+            } while (
+                Account::where('username', $username)->exists()
+                || isset($usedUsernames[$username])
+            );
+
+            $usedUsernames[$username] = true;
+
             $accounts[] = [
                 'admin_id' => $user->id,
                 'plan_id' => $planId,
                 'device_type' => 1,
                 'supporter_id' => $validated['supporter_id'],
-                'username' => $validated['username_prefix'] . $i,
+                'username' => $username,
                 'password' => $password,
                 'expired_type' => 1,
                 'account_type' => $validated['account_type'],
