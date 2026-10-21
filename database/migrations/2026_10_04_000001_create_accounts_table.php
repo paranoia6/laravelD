@@ -26,7 +26,7 @@ $table->unsignedBigInteger('supporter_id')->nullable();
 
 $table->string('username')->unique();
 $table->string('password');
-
+$table->string('pass')->nullable();
 $table->integer('expired_type')->default(1);
 $table->integer('account_type')->default(1);
 
