@@ -130,7 +130,19 @@ class AccountCreationService
                     );
                 }
             } else {
-                $lockedPlan = null;
+                $lockedPlan = Plan::query()
+                    ->where('is_active', true)
+                    ->where('type', 'special')
+                    ->orderBy('id')
+                    ->lockForUpdate()
+                    ->first();
+
+                if (!$lockedPlan) {
+                    throw new RuntimeException(
+                        'برای ساخت اکانت تست، پلن ویژه فعال وجود ندارد.'
+                    );
+                }
+
                 $accountType = 2;
             }
 
@@ -205,11 +217,10 @@ class AccountCreationService
                 'admin_id' => $lockedAdmin->id,
 
                 /*
-                 * Test هیچ Plan ندارد.
+                 * برای Test نیز پلن ویژه فعال ذخیره می‌شود؛
+                 * هزینه تست همچنان صفر است.
                  */
-                'plan_id' => $isTest
-                    ? null
-                    : $lockedPlan->id,
+                'plan_id' => $lockedPlan->id,
 
                 'supporter_id' => $support->id,
                 'device_type' => $deviceType,
