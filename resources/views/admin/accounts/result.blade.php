@@ -238,13 +238,12 @@
                                     </div>
 
 
-                                    <div class="account-meta-item">
-                                        <span>تاریخ انقضا</span>
-
-                                        <strong>
-                                            {{ $account['expired_at'] ?? '---' }}
-                                        </strong>
-                                    </div>
+                                    @if (!empty($account['expired_at']))
+                                        <div class="account-meta-item">
+                                            <span>تاریخ انقضا</span>
+                                            <strong>{{ $account['expired_at'] }}</strong>
+                                        </div>
+                                    @endif
 
                                 </div>
 
@@ -358,9 +357,7 @@
                             'پشتیبانی: ' +
                             (account.support || '---') + '\n' +
                             'تاریخ ایجاد اکانت: ' +
-                            (account.created_at || '---') + '\n' +
-                            'انقضا: ' +
-                            (account.expired_at || '---');
+                            (account.created_at || '---') + (account.expired_at ? '\nانقضا: ' + account.expired_at : '');
 
                         copyText(text, this);
                     });
@@ -402,9 +399,7 @@
                                     'پشتیبانی: ' +
                                     (account.support || '---') + '\n' +
                                     'تاریخ ایجاد اکانت: ' +
-                                    (account.created_at || '---') + '\n' +
-                                    'انقضا: ' +
-                                    (account.expired_at || '---')
+                                    (account.created_at || '---') + (account.expired_at ? '\nانقضا: ' + account.expired_at : '')
                                 );
 
                             })

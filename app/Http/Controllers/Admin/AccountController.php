@@ -273,7 +273,7 @@ class AccountController extends Controller
                             (int) $support->id,
                             (int) $validated['device_type'],
                             $isTest
-                                ? 1
+                                ? 2
                                 : (int) $validated['account_type'],
                             $isTest
                         );
@@ -295,7 +295,7 @@ class AccountController extends Controller
                             (int) $account->device_type,
                         'account_type' =>
                             $isTest
-                                ? 1
+                                ? 2
                                 : (int) $validated['account_type'],
                         'charged_amount' =>
                             (int) $account->charged_amount,
