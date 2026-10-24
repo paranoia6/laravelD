@@ -23,7 +23,7 @@ class StoreAccountRequest extends FormRequest
     {
         if ($this->boolean('is_test')) {
             $this->merge([
-                'account_type' => 1,
+                'account_type' => 2,
                 'plan_id' => null,
             ]);
         }
