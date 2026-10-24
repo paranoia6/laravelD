@@ -21,7 +21,7 @@ function convertToPersianTypeAccount($account_type) {
     } else if($account_type == 2) {
         return "ویژه";
     } else {
-        return "سوپر ویژه";
+        return "تست";
     }
 }
 

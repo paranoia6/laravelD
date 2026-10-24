@@ -30,6 +30,10 @@ class ConfigController extends Controller
             $isActive = 1;
         }
 
+        if ($user->is_test == true) {
+            $accountType = 3;
+        }
+
         return response()->json([
             'message' => "successful",
             'data'    => [
