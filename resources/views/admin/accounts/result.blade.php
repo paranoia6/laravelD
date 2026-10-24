@@ -336,7 +336,6 @@
                         }
 
                         const text =
-                            'Account #' + account.id + '\n' +
                             'Username: ' + account.username + '\n' +
                             'Password: ' + account.password + '\n' +
                             'نوع اکانت: ' +
@@ -378,7 +377,6 @@
                             .map(function (account) {
 
                                 return (
-                                    'Account #' + account.id + '\n' +
                                     'Username: ' + account.username + '\n' +
                                     'Password: ' + account.password + '\n' +
                                     'نوع اکانت: ' +
