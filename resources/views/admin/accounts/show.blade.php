@@ -89,6 +89,16 @@
                                     value="{{ $account->username }}"
                                     readonly
                                 >
+				<label class="form-label mt-3">
+    Password
+</label>
+
+<input
+    type="text"
+    class="form-control"
+    value="{{ $account->password }}"
+    readonly
+>
                                 <button
                                     type="button"
                                     class="btn btn-outline-primary"
