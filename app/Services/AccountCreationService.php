@@ -255,41 +255,17 @@ class AccountCreationService
     }
 
     public function generateUsername(): string
-    {
-        /*
-         * Usernameهای سیستمی:
-         * user1
-         * user2
-         * user3
-         * ...
-         */
-        $maxNumber = Account::query()
-            ->where('username', 'like', 'user%')
-            ->get(['username'])
-            ->map(function ($account) {
-                if (
-                    preg_match('/^user([0-9]+)$/i', $account->username, $matches)
-                ) {
-                    return (int)$matches[1];
-                }
+{
+    do {
+        $username = Str::lower(Str::random(10));
+    } while (
+        Account::query()
+            ->where('username', $username)
+            ->exists()
+    );
 
-                return 0;
-            })
-            ->max();
-
-        $nextNumber = ((int)$maxNumber) + 1;
-
-        do {
-            $username = 'user' . $nextNumber;
-            $nextNumber++;
-        } while (
-            Account::query()
-                ->where('username', $username)
-                ->exists()
-        );
-
-        return $username;
-    }
+    return $username;
+}
 
     public function generatePassword(): string
     {
