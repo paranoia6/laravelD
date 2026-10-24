@@ -10,6 +10,7 @@ use App\Notifications\SystemNotification;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
+use Illuminate\Support\Facades\Schema;
 
 class AccountRenewalService
 {
@@ -253,29 +254,31 @@ class AccountRenewalService
             /*
              * Audit Log
              */
-            AuditLog::create([
-                'user_id' => $lockedAdmin->id,
-                'action' => 'account_renewed',
-                'subject_type' => Account::class,
-                'subject_id' => $lockedAccount->id,
-                'description' =>
-                    "اکانت {$lockedAccount->username} به مدت "
-                    . $lockedPlan->duration_months
-                    . " ماه تمدید شد.",
-                'metadata' => [
-                    'account_id' => $lockedAccount->id,
-                    'username' => $lockedAccount->username,
-                    'admin_id' => $lockedAccount->admin_id,
-                    'actor_id' => $lockedAdmin->id,
-                    'plan_id' => $lockedPlan->id,
-                    'plan_type' => $lockedPlan->type,
-                    'duration_months' => (int) $lockedPlan->duration_months,
-                    'price' => $price,
-                    'old_expired_at' => $currentExpiredAt->toDateTimeString(),
-                    'new_expired_at' => $newExpiredAt->toDateTimeString(),
-                    'renewed_from_existing_expiry' => $currentExpiredAt->isFuture(),
-                ],
-            ]);
+            if (Schema::hasTable('audit_logs')) {
+                AuditLog::create([
+                    'user_id' => $lockedAdmin->id,
+                    'action' => 'account_renewed',
+                    'subject_type' => Account::class,
+                    'subject_id' => $lockedAccount->id,
+                    'description' =>
+                        "اکانت {$lockedAccount->username} به مدت "
+                        . $lockedPlan->duration_months
+                        . " ماه تمدید شد.",
+                    'metadata' => [
+                        'account_id' => $lockedAccount->id,
+                        'username' => $lockedAccount->username,
+                        'admin_id' => $lockedAccount->admin_id,
+                        'actor_id' => $lockedAdmin->id,
+                        'plan_id' => $lockedPlan->id,
+                        'plan_type' => $lockedPlan->type,
+                        'duration_months' => (int) $lockedPlan->duration_months,
+                        'price' => $price,
+                        'old_expired_at' => $currentExpiredAt->toDateTimeString(),
+                        'new_expired_at' => $newExpiredAt->toDateTimeString(),
+                        'renewed_from_existing_expiry' => $currentExpiredAt->isFuture(),
+                    ],
+                ]);
+            }
 
             /*
              * Notification
