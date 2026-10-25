@@ -53,3 +53,49 @@ if (! function_exists('jalali_date')) {
         }
     }
 }
+
+function encode($url){
+
+// داده‌ای که به API ارسال می‌کنیم
+    $data = json_encode([
+        "url" => $url
+    ]);
+
+// شروع cURL
+    $ch = curl_init("https://crypto.happ.su/api-v2.php");
+
+// تنظیمات cURL
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, [
+        "Content-Type: application/json"
+    ]);
+    curl_setopt($ch, CURLOPT_POST, true);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
+
+// اجرا و گرفتن پاسخ
+    $response = curl_exec($ch);
+
+// بررسی خطا
+    if (curl_errno($ch)) {
+        echo 'Error:' . curl_error($ch);
+    }
+
+// بستن cURL
+    curl_close($ch);
+
+    $data = json_decode($response, true);
+
+    $encryptedLink = $data['encrypted_link'] ?? null;
+
+    return $encryptedLink;
+
+}
+
+function getEstimateExpired($client)
+{
+    $now = time(); // or your date as well
+    $your_date = strtotime($client->expired_at);
+    $datediff = $your_date - $now;
+
+    return intval(round($datediff / (60 * 60 * 24)));
+}
