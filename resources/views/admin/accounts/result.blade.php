@@ -106,14 +106,16 @@
                                     {!! $qrCodeFacade::size(190)
                                         ->margin(1)
                                         ->generate(
-                                            json_encode(
-                                                [
-                                                    'username' => $account['username'],
-                                                    'password' => $account['password'],
-                                                ],
-                                                JSON_UNESCAPED_UNICODE
-                                                | JSON_UNESCAPED_SLASHES
-                                            )
+                                            (int) $account['device_type'] === 2
+                                                ? $account['encode']
+                                                : json_encode(
+                                                    [
+                                                        'username' => $account['username'],
+                                                        'password' => $account['password'],
+                                                    ],
+                                                    JSON_UNESCAPED_UNICODE
+                                                    | JSON_UNESCAPED_SLASHES
+                                                )
                                         )
                                     !!}
 
@@ -132,55 +134,74 @@
 
                             {{-- Information --}}
                             <div class="account-result-info">
+                                @if ((int) ($account['device_type'] ?? 0) === 2)
 
-                                <div class="account-copy-section">
-
-                                    <div class="account-field-title">
-                                        Username
-                                    </div>
-
-                                    <div class="account-copy-row">
-
-                                        <div class="account-copy-value">
-                                            {{ $account['username'] }}
+                                    <div class="account-copy-section">
+                                        <div class="account-field-title">
+                                            لینک اتصال
                                         </div>
 
-                                        <button
-                                            type="button"
-                                            class="account-copy-button"
-                                            data-copy="{{ $account['username'] }}"
-                                        >
-                                            کپی
-                                        </button>
+                                        <div class="account-copy-row">
+                                            <div class="account-copy-value">
+                                                {{ $account['encode'] ?? '' }}
+                                            </div>
 
+                                            <button
+                                                type="button"
+                                                class="account-copy-button"
+                                                data-copy="{{ $account['encode'] ?? '' }}"
+                                            >
+                                                کپی
+                                            </button>
+                                        </div>
                                     </div>
 
-                                </div>
+                                @else
 
-
-                                <div class="account-copy-section">
-
-                                    <div class="account-field-title">
-                                        Password
-                                    </div>
-
-                                    <div class="account-copy-row">
-
-                                        <div class="account-copy-value">
-                                            {{ $account['password'] }}
+                                    {{-- Username --}}
+                                    <div class="account-copy-section">
+                                        <div class="account-field-title">
+                                            Username
                                         </div>
 
-                                        <button
-                                            type="button"
-                                            class="account-copy-button"
-                                            data-copy="{{ $account['password'] }}"
-                                        >
-                                            کپی
-                                        </button>
+                                        <div class="account-copy-row">
+                                            <div class="account-copy-value">
+                                                {{ $account['username'] }}
+                                            </div>
 
+                                            <button
+                                                type="button"
+                                                class="account-copy-button"
+                                                data-copy="{{ $account['username'] }}"
+                                            >
+                                                کپی
+                                            </button>
+                                        </div>
                                     </div>
 
-                                </div>
+                                    {{-- Password --}}
+                                    <div class="account-copy-section">
+                                        <div class="account-field-title">
+                                            Password
+                                        </div>
+
+                                        <div class="account-copy-row">
+                                            <div class="account-copy-value">
+                                                {{ $account['password'] }}
+                                            </div>
+
+                                            <button
+                                                type="button"
+                                                class="account-copy-button"
+                                                data-copy="{{ $account['password'] }}"
+                                            >
+                                                کپی
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                @endif
+
 
 
                                 <div class="account-meta-grid">
@@ -260,13 +281,15 @@
                                         مشاهده اکانت
                                     </a>
 
-                                    <button
-                                        type="button"
-                                        class="result-btn result-btn-secondary copy-account-button"
-                                        data-index="{{ $index }}"
-                                    >
-                                        کپی اطلاعات این اکانت
-                                    </button>
+                                    @if ((int) ($account['device_type'] ?? 0) !== 2)
+                                        <button
+                                            type="button"
+                                            class="copy-account-button"
+                                            data-index="{{ $index }}"
+                                        >
+                                            کپی اطلاعات این اکانت
+                                        </button>
+                                    @endif
 
                                 </div>
 

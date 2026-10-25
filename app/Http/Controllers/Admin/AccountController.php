@@ -257,26 +257,30 @@ class AccountController extends Controller
                             $sequence++;
                         }
                     } else {
-                        $username =
-                            $creationService->generateUsername();
+                        $username = $creationService->generateUsername();
                     }
 
-                    $password =
-                        $creationService->generatePassword();
+                    // برای هر اکانت، encode مستقل ساخته می‌شود
+                    $encode = null;
 
-                    $account =
-                        $creationService->create(
-                            $user,
-                            $username,
-                            $password,
-                            $plan,
-                            (int) $support->id,
-                            (int) $validated['device_type'],
-                            $isTest
-                                ? 2
-                                : (int) $validated['account_type'],
-                            $isTest
-                        );
+                    if ((int) $validated['device_type'] === 2) {
+                        $encode = encode(
+                            'https://blocked3.ir/happ?t=' . $username
+                        );                    }
+
+                    $password = $creationService->generatePassword();
+
+                    $account = $creationService->create(
+                        $user,
+                        $username,
+                        $password,
+                        $plan,
+                        (int) $support->id,
+                        (int) $validated['device_type'],
+                        $isTest ? 2 : (int) $validated['account_type'],
+                        $isTest,
+                        $encode
+                    );
 
                     $createdAccounts[] = [
                         'id' => $account->id,
@@ -305,6 +309,7 @@ class AccountController extends Controller
                             $account->created_at?->toDateTimeString(),
                         'expired_at' =>
                             $account->expired_at?->toDateTimeString(),
+                        'encode' => $account->encode
                     ];
                 }
             });
@@ -325,6 +330,7 @@ class AccountController extends Controller
                 ->withInput();
 
         } catch (Throwable $e) {
+
             report($e);
 
             return back()

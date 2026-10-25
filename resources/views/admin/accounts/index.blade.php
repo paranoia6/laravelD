@@ -199,23 +199,15 @@
 
 
                     <tr>
-
                         <td>
-
                             <a
-                                href="{{ route(
-                                    'admin.accounts.show',
-                                    $account
-                                ) }}"
+                                href="{{ route('admin.accounts.show', $account) }}"
                                 class="account-details-link"
                             >
-
                                 <strong>
-                                    {{ $account->username }}
+                                    {{ (int) $account->device_type === 2 ? 'آيفون' : $account->username }}
                                 </strong>
-
                             </a>
-
                         </td>
 
 

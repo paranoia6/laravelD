@@ -79,26 +79,46 @@
 
                             <div class="col-md-6">
 
-                                <label class="form-label">
-                                    Username
-                                </label>
+                                @if ((int) $account->device_type === 2)
 
-                                <input
-                                    type="text"
-                                    class="form-control"
-                                    value="{{ $account->username }}"
-                                    readonly
-                                >
-				<label class="form-label mt-3">
-    Password
-</label>
+                                    <label class="form-label">
+                                        کانفیگ
+                                    </label>
 
-<input
-    type="text"
-    class="form-control"
-    value="{{ $account->password }}"
-    readonly
->
+                                    <input
+                                        type="text"
+                                        class="form-control"
+                                        value="{{ $account->encode ?? '' }}"
+                                        readonly
+                                    >
+
+                                @else
+
+                                    <label class="form-label">
+                                        Username
+                                    </label>
+
+                                    <input
+                                        type="text"
+                                        class="form-control"
+                                        value="{{ $account->username }}"
+                                        readonly
+                                    >
+
+                                    <label class="form-label mt-3">
+                                        Password
+                                    </label>
+
+                                    <input
+                                        type="text"
+                                        class="form-control"
+                                        value="{{ $account->pass }}"
+                                        readonly
+                                    >
+
+                                @endif
+
+
                                 <button
                                     type="button"
                                     class="btn btn-outline-primary"
@@ -293,25 +313,25 @@
 
 
                             @if($account->expired_at)
-                            <div class="col-md-6">
+                                <div class="col-md-6">
 
-                                <label class="form-label">
-                                    تاریخ انقضا
-                                </label>
+                                    <label class="form-label">
+                                        تاریخ انقضا
+                                    </label>
 
-                                <div class="form-control">
+                                    <div class="form-control">
 
-                                    {{ $account->expired_at
-                                        ? jalali_date(
-                                            $account->expired_at,
-                                            'Y/m/d H:i:s'
-                                        )
-                                        : '---'
-                                    }}
+                                        {{ $account->expired_at
+                                            ? jalali_date(
+                                                $account->expired_at,
+                                                'Y/m/d H:i:s'
+                                            )
+                                            : '---'
+                                        }}
+
+                                    </div>
 
                                 </div>
-
-                            </div>
 
                             @endif
 
@@ -353,19 +373,19 @@
 
                                             @case('blocked_under_72_hours')
 
-                                                مسدودی زیر ۷۲ ساعت
+                                            مسدودی زیر ۷۲ ساعت
 
-                                                @break
+                                            @break
 
                                             @case('blocked_over_72_hours')
 
-                                                مسدودی پس از ۷۲ ساعت
+                                            مسدودی پس از ۷۲ ساعت
 
-                                                @break
+                                            @break
 
                                             @default
 
-                                                {{ $account->block_reason ?? '---' }}
+                                            {{ $account->block_reason ?? '---' }}
 
                                         @endswitch
 
@@ -716,22 +736,22 @@
 
                     <div class="card-body">
 
-                        <div class="bg-white border rounded p-3 d-inline-block">
+                        <div class="bg-white border rounded p-3 d-inline-block text-center">
 
-                            {!! QrCode::size(240)
-                                ->margin(1)
-                                ->generate(
-                                    json_encode(
-                                        [
-                                            'username' =>
-                                                $account->username,
-
-                                        ],
-                                        JSON_UNESCAPED_UNICODE
-                                        | JSON_UNESCAPED_SLASHES
-                                    )
-                                )
-                            !!}
+                            {!! QrCode::size(300)
+                     ->margin(1)
+                     ->generate(
+                         (int) $account->device_type === 2
+                             ? ($account->encode ?? '')
+                             : json_encode(
+                                 [
+                                     'username' => $account->username,
+                                 ],
+                                 JSON_UNESCAPED_UNICODE
+                                 | JSON_UNESCAPED_SLASHES
+                             )
+                     )
+                 !!}
 
                         </div>
 
@@ -845,204 +865,209 @@
 
 
 
-            function copyAccountInfo() {
+        function copyAccountInfo() {
 
-                const text =
-                    'Username: {{ $account->username }}\n' +
-                    'Password: {{ $account->password }}\n' +
-                    'نوع اکانت: {{ $account->plan?->type === 'special' ? 'ویژه' : 'عادی' }}\n' +
-                    'دستگاه: {{ (int) $account->device_type === 1 ? 'اندروید' : ((int) $account->device_type === 2 ? 'آیفون' : '---') }}\n' +
-                    'مدت: {{ $account->plan?->duration_months ?? '---' }} ماه\n' +
-                    'پشتیبانی: {{ $account->support?->name ?? '---' }}\n' +
-                    'تاریخ ایجاد اکانت: {{ $account->created_at ? jalali_date($account->created_at, 'Y/m/d H:i:s') : '---' }}' +
-                    @if($account->expired_at)
-                        '\nانقضا: {{ jalali_date($account->expired_at, 'Y/m/d H:i:s') }}' +
-                    @endif
-                        '';
+            @if ((int) $account->device_type === 2)
+            const text = @json($account->encode ?? '');
+            @else
+            const text =
+                'Username: {{ $account->username }}\n' +
+                'Password: {{ $account->password }}\n' +
+                'نوع اکانت: {{ $account->plan?->type === 'special' ? 'ویژه' : 'عادی' }}\n' +
+                'دستگاه: {{ (int) $account->device_type === 1 ? 'اندروید' : '---' }}\n' +
+                'مدت: {{ $account->plan?->duration_months ?? '---' }} ماه\n' +
+                'پشتیبانی: {{ $account->support?->name ?? '---' }}\n' +
+                'تاریخ ایجاد اکانت: {{ $account->created_at ? jalali_date($account->created_at, 'Y/m/d H:i:s') : '---' }}' +
+                @if($account->expired_at)
+                    '\nانقضا: {{ jalali_date($account->expired_at, 'Y/m/d H:i:s') }}' +
+                @endif
+                    '';
+            @endif
+
             navigator.clipboard.writeText(text)
-            .then(function () {
-            alert('اطلاعات اکانت کپی شد.');
-        });
+                .then(function () {
+                    alert('اطلاعات اکانت کپی شد.');
+                });
         }
     </script>
 
 
 
-<style>
-/* =========================================================
-   ACCOUNT DETAILS — تم کارت‌های پنل
-   ========================================================= */
+    <style>
+        /* =========================================================
+           ACCOUNT DETAILS — تم کارت‌های پنل
+           ========================================================= */
 
-.account-details-page {
-    direction: rtl;
-}
+        .account-details-page {
+            direction: rtl;
+        }
 
-.account-details-page .card,
-.container-fluid .card {
-    border: 1px solid #eadde5 !important;
-    border-radius: 18px !important;
-    overflow: hidden;
-    box-shadow: 0 8px 24px rgba(70, 35, 55, .07) !important;
-    background: #fff;
-}
+        .account-details-page .card,
+        .container-fluid .card {
+            border: 1px solid #eadde5 !important;
+            border-radius: 18px !important;
+            overflow: hidden;
+            box-shadow: 0 8px 24px rgba(70, 35, 55, .07) !important;
+            background: #fff;
+        }
 
-.container-fluid .card-header {
-    background: linear-gradient(
-        135deg,
-        #fff7fb,
-        #fff
-    ) !important;
-    border-bottom: 1px solid #eadde5 !important;
-    color: #4a2639;
-    font-weight: 800;
-    padding: 16px 20px;
-}
+        .container-fluid .card-header {
+            background: linear-gradient(
+                135deg,
+                #fff7fb,
+                #fff
+            ) !important;
+            border-bottom: 1px solid #eadde5 !important;
+            color: #4a2639;
+            font-weight: 800;
+            padding: 16px 20px;
+        }
 
-.container-fluid .card-body {
-    padding: 22px;
-}
+        .container-fluid .card-body {
+            padding: 22px;
+        }
 
-/* عنوان صفحه */
-.container-fluid > .d-flex {
-    background: #fff;
-    border: 1px solid #eadde5;
-    border-radius: 18px;
-    padding: 18px 22px;
-    box-shadow: 0 6px 20px rgba(70, 35, 55, .05);
-}
+        /* عنوان صفحه */
+        .container-fluid > .d-flex {
+            background: #fff;
+            border: 1px solid #eadde5;
+            border-radius: 18px;
+            padding: 18px 22px;
+            box-shadow: 0 6px 20px rgba(70, 35, 55, .05);
+        }
 
-.container-fluid > .d-flex h1 {
-    color: #3f2231;
-    font-weight: 900;
-}
+        .container-fluid > .d-flex h1 {
+            color: #3f2231;
+            font-weight: 900;
+        }
 
-.container-fluid > .d-flex .text-muted {
-    margin-top: 4px;
-}
+        .container-fluid > .d-flex .text-muted {
+            margin-top: 4px;
+        }
 
-/* اطلاعات اکانت */
-.container-fluid .card .form-label {
-    display: block;
-    color: #6b5360;
-    font-size: 13px;
-    font-weight: 800;
-    margin-bottom: 7px;
-}
+        /* اطلاعات اکانت */
+        .container-fluid .card .form-label {
+            display: block;
+            color: #6b5360;
+            font-size: 13px;
+            font-weight: 800;
+            margin-bottom: 7px;
+        }
 
-.container-fluid .card .form-control,
-.container-fluid .card input.form-control {
-    min-height: 46px;
-    border-radius: 12px;
-    border: 1px solid #eadde5;
-    background: #fcfafb;
-    color: #3f2934;
-    font-weight: 700;
-    box-shadow: none;
-}
+        .container-fluid .card .form-control,
+        .container-fluid .card input.form-control {
+            min-height: 46px;
+            border-radius: 12px;
+            border: 1px solid #eadde5;
+            background: #fcfafb;
+            color: #3f2934;
+            font-weight: 700;
+            box-shadow: none;
+        }
 
-.container-fluid .card .form-control:focus {
-    border-color: #c98eac;
-    box-shadow: 0 0 0 3px rgba(201, 142, 172, .12);
-}
+        .container-fluid .card .form-control:focus {
+            border-color: #c98eac;
+            box-shadow: 0 0 0 3px rgba(201, 142, 172, .12);
+        }
 
-/* badge وضعیت */
-.container-fluid .badge {
-    border-radius: 999px;
-    padding: 7px 13px;
-    font-size: 12px;
-    font-weight: 800;
-}
+        /* badge وضعیت */
+        .container-fluid .badge {
+            border-radius: 999px;
+            padding: 7px 13px;
+            font-size: 12px;
+            font-weight: 800;
+        }
 
-/* بخش‌های داخلی اطلاعات */
-.container-fluid .row.g-3 > [class*="col-"] {
-    margin-bottom: 2px;
-}
+        /* بخش‌های داخلی اطلاعات */
+        .container-fluid .row.g-3 > [class*="col-"] {
+            margin-bottom: 2px;
+        }
 
-/* دکمه کپی */
-.container-fluid .btn {
-    border-radius: 11px;
-    font-weight: 800;
-}
+        /* دکمه کپی */
+        .container-fluid .btn {
+            border-radius: 11px;
+            font-weight: 800;
+        }
 
-/* کارت تمدید */
-#renew-account {
-    scroll-margin-top: 100px;
-}
+        /* کارت تمدید */
+        #renew-account {
+            scroll-margin-top: 100px;
+        }
 
-#renew-account .card-body {
-    background: #fff;
-}
+        #renew-account .card-body {
+            background: #fff;
+        }
 
-.renewal-wallet-info {
-    background: #faf7f9 !important;
-    border: 1px solid #eee1e8;
-    border-radius: 12px;
-    padding: 13px 15px;
-    color: #6b5a63;
-}
+        .renewal-wallet-info {
+            background: #faf7f9 !important;
+            border: 1px solid #eee1e8;
+            border-radius: 12px;
+            padding: 13px 15px;
+            color: #6b5a63;
+        }
 
-/* مسدودسازی */
-.container-fluid .alert {
-    border-radius: 13px;
-    border-width: 1px;
-    font-weight: 600;
-    line-height: 1.9;
-}
+        /* مسدودسازی */
+        .container-fluid .alert {
+            border-radius: 13px;
+            border-width: 1px;
+            font-weight: 600;
+            line-height: 1.9;
+        }
 
-.container-fluid .alert-warning {
-    background: #fffaf0;
-    border-color: #f1dfb4;
-}
+        .container-fluid .alert-warning {
+            background: #fffaf0;
+            border-color: #f1dfb4;
+        }
 
-.container-fluid .alert-danger {
-    background: #fff5f6;
-    border-color: #efcfd4;
-}
+        .container-fluid .alert-danger {
+            background: #fff5f6;
+            border-color: #efcfd4;
+        }
 
-/* QR */
-.container-fluid .col-lg-4 > .card {
-    position: sticky;
-    top: 24px;
-}
+        /* QR */
+        .container-fluid .col-lg-4 > .card {
+            position: sticky;
+            top: 24px;
+        }
 
-.container-fluid .col-lg-4 .bg-white {
-    border-color: #eadde5 !important;
-    border-radius: 16px !important;
-    box-shadow: 0 5px 18px rgba(70, 35, 55, .06);
-}
+        .container-fluid .col-lg-4 .bg-white {
+            border-color: #eadde5 !important;
+            border-radius: 16px !important;
+            box-shadow: 0 5px 18px rgba(70, 35, 55, .06);
+        }
 
-.container-fluid .col-lg-4 .text-muted {
-    font-weight: 700;
-    color: #75636b !important;
-}
+        .container-fluid .col-lg-4 .text-muted {
+            font-weight: 700;
+            color: #75636b !important;
+        }
 
-/* فاصله و نظم کلی */
-.container-fluid .row.g-4 {
-    align-items: flex-start;
-}
+        /* فاصله و نظم کلی */
+        .container-fluid .row.g-4 {
+            align-items: flex-start;
+        }
 
-@media(max-width: 991px) {
-    .container-fluid .col-lg-4 > .card {
-        position: static;
-    }
-}
+        @media (max-width: 991px) {
+            .container-fluid .col-lg-4 > .card {
+                position: static;
+            }
+        }
 
-@media(max-width: 767px) {
-    .container-fluid {
-        padding-left: 12px;
-        padding-right: 12px;
-    }
+        @media (max-width: 767px) {
+            .container-fluid {
+                padding-left: 12px;
+                padding-right: 12px;
+            }
 
-    .container-fluid > .d-flex {
-        gap: 14px;
-        align-items: flex-start !important;
-        flex-direction: column;
-    }
+            .container-fluid > .d-flex {
+                gap: 14px;
+                align-items: flex-start !important;
+                flex-direction: column;
+            }
 
-    .container-fluid .card-body {
-        padding: 17px;
-    }
-}
-</style>
+            .container-fluid .card-body {
+                padding: 17px;
+            }
+        }
+    </style>
 
 @endsection

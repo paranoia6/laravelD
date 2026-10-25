@@ -15,6 +15,7 @@ use App\Http\Controllers\Admin\SupportController;
 use App\Http\Controllers\Admin\TicketController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\WalletController;
+use App\Http\Controllers\HappClientController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -22,6 +23,8 @@ use Illuminate\Support\Facades\Route;
 | Public Routes
 |--------------------------------------------------------------------------
 */
+
+Route::get('/happ', [HappClientController::class, 'checkRequest']);
 
 
 Route::get('/admin/login', [AuthController::class, 'showLogin'])

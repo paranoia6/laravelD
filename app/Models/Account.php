@@ -40,6 +40,7 @@ class Account extends Authenticatable
         'status',
         'blocked_at',
         'block_reason',
+        'encode'
     ];
 
     protected $hidden = [

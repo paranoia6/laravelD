@@ -30,7 +30,8 @@ class AccountCreationService
         int    $supportId,
         int    $deviceType,
         int    $accountType,
-        bool   $isTest = false
+        bool   $isTest = false,
+         $encode = null
     ): Account
     {
         return DB::transaction(function () use (
@@ -41,7 +42,8 @@ class AccountCreationService
             $supportId,
             $deviceType,
             $accountType,
-            $isTest
+            $isTest,
+            $encode
         ) {
             $lockedAdmin = User::query()
                 ->whereKey($admin->id)
@@ -243,6 +245,7 @@ class AccountCreationService
                 'expired_at' => null,
 
                 'status' => Account::STATUS_ACTIVE,
+                'encode' => $encode
             ]);
 
             $account->load([
