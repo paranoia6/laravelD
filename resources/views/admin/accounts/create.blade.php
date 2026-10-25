@@ -277,7 +277,7 @@
                 </div>
 
                 {{-- USERNAME --}}
-                <div class="form-card full">
+                <div class="form-card full" id="username-method-card">
                     <h3>روش نام کاربری</h3>
 
                     <div class="choices">
@@ -823,6 +823,9 @@
             const prefixInput =
                 document.getElementById('username_prefix');
 
+            const usernameMethodCard =
+                document.getElementById('username-method-card');
+
             const form =
                 document.getElementById('account-create-form');
 
@@ -903,6 +906,41 @@
                     device === 2
                         ? 'iPhone'
                         : 'Android';
+
+                updateUsernameModeForDevice();
+            }
+
+            function updateUsernameModeForDevice() {
+                const isIphone = getDeviceType() === 2;
+
+                usernameMethodCard
+                    .querySelectorAll('input[name="username_mode"]')
+                    .forEach(function (input) {
+                        input.disabled = isIphone;
+                    });
+
+                prefixInput.disabled = isIphone;
+
+                if (isIphone) {
+                    prefixBox.style.display = 'none';
+                    prefixInput.required = false;
+                    usernameMethodCard.style.opacity = '0.55';
+                } else {
+                    usernameMethodCard.style.opacity = '1';
+
+                    const selectedMode =
+                        document.querySelector(
+                            'input[name="username_mode"]:checked'
+                        );
+
+                    const usePrefix =
+                        selectedMode && selectedMode.value === 'prefix';
+
+                    prefixBox.style.display =
+                        usePrefix ? 'block' : 'none';
+
+                    prefixInput.required = Boolean(usePrefix);
+                }
             }
 
             function updateTestMode() {

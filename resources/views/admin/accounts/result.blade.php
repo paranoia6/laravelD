@@ -16,7 +16,12 @@
 
             <div>
                 <h1>اکانت‌های ساخته‌شده</h1>
-                <p>اطلاعات ورود و QR Code اکانت‌ها</p>
+                <p>
+                    {{ (int) ($createdAccounts[0]['device_type'] ?? 1) === 2
+                        ? 'جزئیات اکانت‌های ساخته‌شده'
+                        : 'اطلاعات ورود و QR Code اکانت‌ها'
+                    }}
+                </p>
             </div>
 
             <div class="account-result-actions">
@@ -54,7 +59,10 @@
 
         @else
 
-            @if(count($createdAccounts) > 1)
+            @if(
+                count($createdAccounts) > 1
+                && (int) ($createdAccounts[0]['device_type'] ?? 1) !== 2
+            )
 
                 <div class="result-summary">
 
@@ -99,6 +107,7 @@
                         <div class="account-result-card-body">
 
                             {{-- QR --}}
+                            @if ((int) $account['device_type'] !== 2)
                             <div class="account-result-qr">
 
                                 <div class="account-result-qr-box">
@@ -128,11 +137,13 @@
                                 </div>
 
                             </div>
+                            @endif
 
 
                             {{-- Information --}}
                             <div class="account-result-info">
 
+                                @if ((int) $account['device_type'] !== 2)
                                 <div class="account-copy-section">
 
                                     <div class="account-field-title">
@@ -182,6 +193,8 @@
 
                                 </div>
 
+
+                                @endif
 
                                 <div class="account-meta-grid">
 
@@ -261,6 +274,7 @@
                                         مشاهده اکانت
                                     </a>
 
+                                    @if ((int) $account['device_type'] !== 2)
                                     <button
                                         type="button"
                                         class="result-btn result-btn-secondary copy-account-button"
@@ -268,6 +282,7 @@
                                     >
                                         کپی اطلاعات این اکانت
                                     </button>
+                                    @endif
 
                                 </div>
 
@@ -336,10 +351,8 @@
                             return;
                         }
 
-                        const text =
+                        let text =
                             'Account #' + account.id + '\n' +
-                            'Username: ' + account.username + '\n' +
-                            'Password: ' + account.password + '\n' +
                             'نوع اکانت: ' +
                             (
                                 Number(account.account_type) === 1
@@ -362,6 +375,14 @@
                             'انقضا: ' +
                             (account.expired_at || '---');
 
+                        if (Number(account.device_type) !== 2) {
+                            text =
+                                'Account #' + account.id + '\n' +
+                                'Username: ' + account.username + '\n' +
+                                'Password: ' + account.password + '\n' +
+                                text.substring(('Account #' + account.id + '\n').length);
+                        }
+
                         copyText(text, this);
                     });
                 });
@@ -380,10 +401,16 @@
                         const text = accounts
                             .map(function (account) {
 
-                                return (
-                                    'Account #' + account.id + '\n' +
-                                    'Username: ' + account.username + '\n' +
-                                    'Password: ' + account.password + '\n' +
+                                let text =
+                                    'Account #' + account.id + '\n';
+
+                                if (Number(account.device_type) !== 2) {
+                                    text +=
+                                        'Username: ' + account.username + '\n' +
+                                        'Password: ' + account.password + '\n';
+                                }
+
+                                text +=
                                     'نوع اکانت: ' +
                                     (
                                         Number(account.account_type) === 1
@@ -404,9 +431,9 @@
                                     'تاریخ ایجاد اکانت: ' +
                                     (account.created_at || '---') + '\n' +
                                     'انقضا: ' +
-                                    (account.expired_at || '---')
-                                );
+                                    (account.expired_at || '---');
 
+                                return text;
                             })
                             .join(
                                 '\n\n--------------------\n\n'
