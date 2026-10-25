@@ -90,7 +90,7 @@
                                     readonly
                                 >
 				<label class="form-label mt-3">
-    Password
+    Pass
 </label>
 
 <input
