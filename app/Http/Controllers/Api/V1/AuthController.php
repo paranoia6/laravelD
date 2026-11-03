@@ -88,11 +88,16 @@ class AuthController extends Controller
 
         $firstLoginDate = \Morilog\Jalali\CalendarUtils::strftime('H:i:s d-m-Y', $user->first_login_date);
 
+        $isActive = 0;
+        if ($user->status == Account::STATUS_ACTIVE) {
+            $isActive = 1;
+        }
+
         $userInformation = [
             'id'              => $user->id,
             'email'           => $user->username,
             'first_login_date'=> $firstLoginDate,
-            'is_active'       => $user->is_active
+            'is_active'       => $isActive
         ];
 
         // 6. Return consistent, clean API structure for Android client
