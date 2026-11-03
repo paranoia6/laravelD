@@ -31,7 +31,7 @@ function remainingDays(string $date): string
     $expiresAt = \Carbon\Carbon::createFromFormat('Y-m-d H:i:s', $date);
 
     if ($expiresAt->isPast()) {
-        return 'اتمام رسیده';
+        return '0';
     }
 
     $days = $now->diffInDays($expiresAt);
