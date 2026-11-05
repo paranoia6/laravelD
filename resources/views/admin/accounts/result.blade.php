@@ -129,6 +129,14 @@
                                     برای ورود سریع اسکن کنید
                                 </div>
 
+                                <button
+                                    type="button"
+                                    class="result-btn result-btn-secondary copy-qr-image-button"
+                                    style="margin-top: 10px;"
+                                >
+                                    کپی QR
+                                </button>
+
                             </div>
 
 
@@ -328,6 +336,75 @@
                     alert('کپی کردن انجام نشد.');
                 }
             }
+
+            async function copyQrImage(button) {
+                try {
+                    if (
+                        !navigator.clipboard ||
+                        typeof ClipboardItem === 'undefined' ||
+                        typeof createImageBitmap === 'undefined'
+                    ) {
+                        throw new Error('Image clipboard is not supported');
+                    }
+
+                    const qr = button
+                        .closest('.account-result-card')
+                        .querySelector('.account-result-qr-box svg');
+
+                    if (!qr) {
+                        throw new Error('QR image not found');
+                    }
+
+                    const svg = qr.cloneNode(true);
+                    svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+
+                    const svgBlob = new Blob(
+                        [new XMLSerializer().serializeToString(svg)],
+                        { type: 'image/svg+xml;charset=utf-8' }
+                    );
+
+                    const bitmap = await createImageBitmap(svgBlob);
+                    const canvas = document.createElement('canvas');
+
+                    canvas.width = bitmap.width;
+                    canvas.height = bitmap.height;
+
+                    const context = canvas.getContext('2d');
+                    context.drawImage(bitmap, 0, 0);
+                    bitmap.close();
+
+                    const pngBlob = await new Promise(function (resolve) {
+                        canvas.toBlob(resolve, 'image/png');
+                    });
+
+                    if (!pngBlob) {
+                        throw new Error('PNG conversion failed');
+                    }
+
+                    await navigator.clipboard.write([
+                        new ClipboardItem({ 'image/png': pngBlob })
+                    ]);
+
+                    const oldText = button.innerText;
+                    button.innerText = 'کپی شد';
+
+                    setTimeout(function () {
+                        button.innerText = oldText;
+                    }, 1200);
+
+                } catch (error) {
+                    alert('کپی تصویر QR انجام نشد. مرورگر باید از کپی تصویر پشتیبانی کند.');
+                    console.error(error);
+                }
+            }
+
+            document
+                .querySelectorAll('.copy-qr-image-button')
+                .forEach(function (button) {
+                    button.addEventListener('click', function () {
+                        copyQrImage(this);
+                    });
+                });
 
             document
                 .querySelectorAll('.account-copy-button')
