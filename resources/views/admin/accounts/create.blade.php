@@ -905,6 +905,61 @@
                         : 'Android';
             }
 
+            function updateUsernameModeForDevice() {
+                const isIphone = getDeviceType() === 2;
+
+                const usernameModeInputs =
+                    document.querySelectorAll(
+                        'input[name="username_mode"]'
+                    );
+
+                usernameModeInputs.forEach(function (input) {
+                    input.disabled = isIphone;
+                });
+
+                let hiddenMode =
+                    document.getElementById('iphone-username-mode');
+
+                if (isIphone) {
+                    const randomMode = document.querySelector(
+                        'input[name="username_mode"][value="random"]'
+                    );
+                    const prefixMode = document.querySelector(
+                        'input[name="username_mode"][value="prefix"]'
+                    );
+
+                    randomMode.checked = true;
+                    prefixMode.checked = false;
+
+                    if (!hiddenMode) {
+                        hiddenMode = document.createElement('input');
+                        hiddenMode.type = 'hidden';
+                        hiddenMode.name = 'username_mode';
+                        hiddenMode.id = 'iphone-username-mode';
+                        hiddenMode.value = 'random';
+                        form.appendChild(hiddenMode);
+                    }
+
+                    prefixBox.style.display = 'none';
+                    prefixInput.required = false;
+                } else {
+                    if (hiddenMode) {
+                        hiddenMode.remove();
+                    }
+
+                    const selectedMode =
+                        document.querySelector(
+                            'input[name="username_mode"]:checked'
+                        );
+
+                    if (selectedMode) {
+                        selectedMode.dispatchEvent(
+                            new Event('change')
+                        );
+                    }
+                }
+            }
+
             function updateTestMode() {
 
                 const test = isTest();
@@ -1065,7 +1120,10 @@
             deviceInputs.forEach(function (input) {
                 input.addEventListener(
                     'change',
-                    updateDeviceSummary
+                    function () {
+                        updateDeviceSummary();
+                        updateUsernameModeForDevice();
+                    }
                 );
             });
 
@@ -1214,6 +1272,7 @@
                 );
             }
 
+            updateUsernameModeForDevice();
             updateDeviceSummary();
             updateTestMode();
             updateTotal();
