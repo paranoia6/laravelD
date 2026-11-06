@@ -435,9 +435,14 @@
                             return;
                         }
 
+                        const loginDetails =
+                            Number(account.device_type) === 2
+                                ? ''
+                                : 'Username: ' + account.username + '\n' +
+                                  'Password: ' + account.password + '\n';
+
                         const text =
-                            'Username: ' + account.username + '\n' +
-                            'Password: ' + account.password + '\n' +
+                            loginDetails +
                             'نوع اکانت: ' +
                             (
                                 Number(account.account_type) === 1
@@ -476,9 +481,14 @@
                         const text = accounts
                             .map(function (account) {
 
+                                const loginDetails =
+                                    Number(account.device_type) === 2
+                                        ? ''
+                                        : 'Username: ' + account.username + '\n' +
+                                          'Password: ' + account.password + '\n';
+
                                 return (
-                                    'Username: ' + account.username + '\n' +
-                                    'Password: ' + account.password + '\n' +
+                                    loginDetails +
                                     'نوع اکانت: ' +
                                     (
                                         Number(account.account_type) === 1

@@ -238,7 +238,9 @@ class AccountController extends Controller
                 $quantity,
                 $isTest
             ) {
-                $mode = $validated['username_mode'] ?? 'random';
+                $mode = (int) $validated['device_type'] === 2
+                    ? 'random'
+                    : ($validated['username_mode'] ?? 'random');
                 $prefix = trim(
                     (string) ($validated['username_prefix'] ?? '')
                 );
@@ -282,10 +284,8 @@ class AccountController extends Controller
                         $encode
                     );
 
-                    $createdAccounts[] = [
+                    $createdAccountData = [
                         'id' => $account->id,
-                        'username' => $username,
-                        'password' => $password,
                         'plan_id' => $account->plan_id,
                         'duration_months' =>
                             (int) ($account->plan?->duration_months ?? 0),
@@ -311,6 +311,13 @@ class AccountController extends Controller
                             $account->expired_at?->toDateTimeString(),
                         'encode' => $account->encode
                     ];
+
+                    if ((int) $account->device_type !== 2) {
+                        $createdAccountData['username'] = $username;
+                        $createdAccountData['password'] = $password;
+                    }
+
+                    $createdAccounts[] = $createdAccountData;
                 }
             });
 
