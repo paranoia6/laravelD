@@ -66,6 +66,7 @@ class StoreAccountRequest extends FormRequest
             ],
 
             'username_mode' => [
+                'exclude_if:device_type,2',
                 'required',
                 Rule::in([
                     'random',
@@ -74,6 +75,7 @@ class StoreAccountRequest extends FormRequest
             ],
 
             'username_prefix' => [
+                'exclude_if:device_type,2',
                 'nullable',
                 'string',
                 'max:30',
