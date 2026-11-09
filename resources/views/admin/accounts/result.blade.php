@@ -393,7 +393,7 @@
                     }, 1200);
 
                 } catch (error) {
-                    alert('کپی تصویر QR انجام نشد. مرورگر باید از کپی تصویر پشتیبانی کند.');
+                    alert('خطا: ' + error.name + ' - ' + error.message);
                     console.error(error);
                 }
             }
