@@ -339,11 +339,7 @@
 
             async function copyQrImage(button) {
                 try {
-                    if (
-                        !navigator.clipboard ||
-                        typeof ClipboardItem === 'undefined' ||
-                        typeof createImageBitmap === 'undefined'
-                    ) {
+                    if (!navigator.clipboard || typeof ClipboardItem === 'undefined') {
                         throw new Error('Image clipboard is not supported');
                     }
 
@@ -355,23 +351,46 @@
                         throw new Error('QR image not found');
                     }
 
+                    const bounds = qr.getBoundingClientRect();
+                    const width = Math.max(1, Math.round(bounds.width || 190));
+                    const height = Math.max(1, Math.round(bounds.height || 190));
+
                     const svg = qr.cloneNode(true);
                     svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+                    svg.setAttribute('width', width);
+                    svg.setAttribute('height', height);
 
                     const svgBlob = new Blob(
                         [new XMLSerializer().serializeToString(svg)],
                         { type: 'image/svg+xml;charset=utf-8' }
                     );
 
-                    const bitmap = await createImageBitmap(svgBlob);
-                    const canvas = document.createElement('canvas');
+                    const svgUrl = URL.createObjectURL(svgBlob);
+                    const image = new Image();
 
-                    canvas.width = bitmap.width;
-                    canvas.height = bitmap.height;
+                    try {
+                        await new Promise(function (resolve, reject) {
+                            image.onload = resolve;
+                            image.onerror = function () {
+                                reject(new Error('SVG image could not be loaded'));
+                            };
+                            image.src = svgUrl;
+                        });
+                    } finally {
+                        URL.revokeObjectURL(svgUrl);
+                    }
+
+                    const canvas = document.createElement('canvas');
+                    canvas.width = width * 2;
+                    canvas.height = height * 2;
 
                     const context = canvas.getContext('2d');
-                    context.drawImage(bitmap, 0, 0);
-                    bitmap.close();
+
+                    if (!context) {
+                        throw new Error('Canvas context is not available');
+                    }
+
+                    context.drawImage(image, 0, 0, canvas.width, canvas.height);
 
                     const pngBlob = await new Promise(function (resolve) {
                         canvas.toBlob(resolve, 'image/png');
