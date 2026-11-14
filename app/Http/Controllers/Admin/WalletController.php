@@ -14,11 +14,11 @@ class WalletController extends Controller
     {
         $user = $request->user();
 
-        if (! in_array($user->role, ['admin', 'super_admin'], true)) {
+        if (! in_array($user->roleValue(), ['admin', 'super_admin'], true)) {
             abort(403);
         }
 
-        if ($user->role === 'admin') {
+        if ($user->roleValue() === 'admin') {
 
             $transactions = WalletTransaction::query()
                 ->where('user_id', $user->id)
