@@ -43,7 +43,7 @@
                     <tr>
 
                         <td>
-                            {{ $log->user?->email ?? 'سیستم' }}
+                            {{ $log->user?->displayNameFor(auth()->user()) ?? 'سیستم' }}
                         </td>
 
                         <td>

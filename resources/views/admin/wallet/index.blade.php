@@ -186,7 +186,7 @@
                                 </td>
 
                                 <td>
-                                    {{ $transaction->creator->email ?? '-' }}
+                                    {{ $transaction->creator?->displayNameFor(auth()->user()) ?? '-' }}
                                 </td>
 
                             </tr>

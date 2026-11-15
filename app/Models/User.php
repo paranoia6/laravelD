@@ -109,4 +109,14 @@ class User extends Authenticatable
         return is_string($role) ? $role : null;
     }
 
+
+    public function displayNameFor(?self $viewer): string
+    {
+        if ($this->roleValue() === "super_admin" && $viewer?->roleValue() !== "super_admin") {
+            return "پشتیبانی دوپینگ";
+        }
+
+        return $this->email ?? "کاربر";
+    }
+
 }
