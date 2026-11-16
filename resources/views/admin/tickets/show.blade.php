@@ -100,6 +100,8 @@
                 @php
                     $isMe = (int) $message->user_id === (int) auth()->id();
                     $isSuperAdmin = $message->user?->roleValue() === 'super_admin';
+                    $displayName = $message->user?->displayNameFor(auth()->user()) ?? 'کاربر';
+                    $isHiddenSuperAdmin = $isSuperAdmin && auth()->user()?->roleValue() !== 'super_admin';
                 @endphp
 
                 <article class="ticket-message {{ $isMe ? 'mine' : 'theirs' }}">
@@ -108,16 +110,16 @@
 
                         <div class="ticket-message-user">
                         <span class="ticket-message-avatar">
-                            {{ mb_substr($message->user->email ?? 'U', 0, 1) }}
+                            {{ mb_substr($displayName, 0, 1) }}
                         </span>
 
                             <div>
                                 <strong>
-                                    {{ $message->user->email ?? 'کاربر' }}
+                                    {{ $displayName }}
                                 </strong>
 
                                 <small>
-                                    {{ $isSuperAdmin ? 'Super Admin' : 'Admin' }}
+                                    {{ $isHiddenSuperAdmin ? 'پشتیبانی' : ($isSuperAdmin ? 'Super Admin' : 'Admin') }}
                                 </small>
                             </div>
                         </div>
