@@ -18,6 +18,8 @@ return Application::configure(basePath: dirname(__DIR__))
             'role' => \App\Http\Middleware\AdminRole::class,
         ]);
 
+        $middleware->redirectGuestsTo('/admin/login');
+
         //
     })
     ->withExceptions(function (Exceptions $exceptions): void {
